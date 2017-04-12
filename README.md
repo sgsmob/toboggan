@@ -1,6 +1,6 @@
 # Toboggan
 
-Toboggan is a research tool to decompose a flow on a directed acyclic graph into
+Toboggan is a research tool for decomposing a flow on a directed acyclic graph into
 a minimal number of paths, a problem that commonly occurs in transcript and metagenomic
 assembly.
 
@@ -9,20 +9,20 @@ assembly.
 $>python3 toboggan.py [INPUT FILE] 
 ```
 Runs the Toboggan algorithm on every instance provided in the input file (for file format specifications,
-see below or consider the example file provided in `testdata').
+see below or consider the example file provided in `testdata`).
 
 Positional arguments:
-  * `file' - a .graph file (see below)
+  * `file` - a .graph file (see below)
 
-If a .truth accompanies the input .graph file, the instances are each run with the number of
+If a `.truth` accompanies the input `.graph` file, the instances are each run with the number of
 paths in their respective ground-truth as input. Otherwise, successively larger numbers are
 tried until a solution is found.
 
 Optional arguments:
-  * `-h, --help' - Show a help message and exit
-  * `--timeout' TIMEOUT - Set a timeout for the computation of each individual instance.
-  * `--disprove' - Run instances with parameter k-1 instead of k (needs a .truth file)
-  * `--indices' INDICES -  Either a file containing indices (position in .graph
+  * `-h, --help` - Show a help message and exit
+  * `--timeout` TIMEOUT - Set a timeout for the computation of each individual instance.
+  * `--disprove` - Run instances with parameter k-1 instead of k (needs a `.truth` file)
+  * `--indices` INDICES -  Either a file containing indices (position in `.graph`
                      file) on which to run, or a list of indices separated by
                      commas. Ranges are accepted as well, e.g. "1,2-5,6".
 
@@ -33,7 +33,7 @@ The call
 $>python3 toboggan.py testdata/toboggan_test.graph --indices 1,3-5
 ```
 will run the Toboggan algorithm on the first, third, fourth and fifth graph
-contained in `toboggan_test.graph'. The outputs should looks as follows:
+contained in `toboggan_test.graph`. The outputs should looks as follows:
 
 ```
 # No timeout set
@@ -70,24 +70,24 @@ the output should consist of the message
 2 toboggan_test:1 is trivial.
 ```
 
-The term `trivial' here mans that the instance consists only of a single path.
+The term `trivial` here mans that the instance consists only of a single path.
 
 ### Data formatting
 #### Datasets
 
-We use two files formats in Toboggan, .graph and .truth. 
+We use two files formats in Toboggan, `.graph` and `.truth`. 
 
-A .graph file contains an arbitrary number of graphs, stored as follows:
+A `.graph` file contains an arbitrary number of graphs, stored as follows:
 
 * Each graph-instance begins with a header  line formatted as follows:
   * `# graph number = 0 name = toboggan_test`.
 * The line after the header contains the number of vertices in the graph,
 * each subsequent line gives the head vertex, tail vertex, and weight for an arc.
 
-A .truth can accompany a .graph file and contains the ground-truths (a set of
+A `.truth` can accompany a .graph file and contains the ground-truths (a set of
 weighted paths) to the graphs contained in the later. We assume the following convention:
 
-* The file `NAME.truth' contains ground-truth for every graph in `NAME.graph`
+* The file `NAME.truth` contains ground-truth for every graph in `NAME.graph`
 * We assume that the ground-truth appear in the same order as their associated graphs
   and they begin with the same header line (see above).
 * After the header line, each line corresponds to one of the paths in the solution
@@ -97,7 +97,7 @@ weighted paths) to the graphs contained in the later. We assume the following co
 
 ## Contribution (for Developers)
 
-We welcome contributions to CONCUSS, in the form of 
+We welcome contributions to Toboggan, in the form of 
 [Pull Requests](https://help.github.com/articles/using-pull-requests/),
 where you "fork" our repository and then request that we "pull" your changes into the main branch.
 You must have a Github account to make a contribution.
@@ -126,7 +126,7 @@ software is allowed.
 
 ## Acknowledgements
 
-Development of the CONCUSS software package was funded in part by
+Development of the Toboggan software package was funded in part by
 the [Gordon & Betty Moore Foundation Data-Driven Discovery Initiative](https://www.moore.org/programs/science/data-driven-discovery),
 through a [DDD Investigator Award](https://www.moore.org/programs/science/data-driven-discovery/investigators)
 to Blair D. Sullivan ([grant GBMF4560](https://www.moore.org/grants/list/GBMF4560)). 
