@@ -19,10 +19,10 @@ paths in their respective ground-truth as input. Otherwise, successively larger 
 tried until a solution is found.
 
 Optional arguments:
-  *`-h, --help' - Show a help message and exit
-  *`--timeout' TIMEOUT - Set a timeout for the computation of each individual instance.
-  *`--disprove' - Run instances with parameter k-1 instead of k (needs a .truth file)
-  *`--indices' INDICES -  Either a file containing indices (position in .graph
+  * `-h, --help' - Show a help message and exit
+  * `--timeout' TIMEOUT - Set a timeout for the computation of each individual instance.
+  * `--disprove' - Run instances with parameter k-1 instead of k (needs a .truth file)
+  * `--indices' INDICES -  Either a file containing indices (position in .graph
                      file) on which to run, or a list of indices separated by
                      commas. Ranges are accepted as well, e.g. "1,2-5,6".
 
