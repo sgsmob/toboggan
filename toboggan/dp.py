@@ -65,13 +65,10 @@ def solve(instance, silent=True, guessed_weights=None):
             globalconstr = SolvedConstr(weights, instance)
 
     # Build first DP table
-    table = defaultdict(set)
+    old_table = defaultdict(set)
     allpaths = frozenset(range(k))
     # All k paths `end' at source
-    table[PathConf.init(0, allpaths)] = set([globalconstr])
-
-    DP = [None] * (n)
-    DP[0] = table
+    old_table[PathConf.init(0, allpaths)] = set([globalconstr])
 
     # Run DP
     for i in range(n-1):
@@ -80,8 +77,8 @@ def solve(instance, silent=True, guessed_weights=None):
             print("Active ({}): {}".format(i, instance.cuts[i]))
             print("Removing {} from active set".format(i))
 
-        DP[i+1] = defaultdict(set)
-        for paths, constraints in DP[i].items():
+        new_table = defaultdict(set)
+        for paths, constraints in old_table.items():
             # Distribute paths incoming to i onto its neighbours
             if not silent:
                 print("  Pushing {}".format(paths))
@@ -117,16 +114,18 @@ def solve(instance, silent=True, guessed_weights=None):
                         pass  # Redundant constraints
                     else:
                         if not silent:
-                            if newpaths not in DP[i+1] or \
-                                    newconstr not in DP[i+1][newpaths]:
+                            if newpaths not in new_table or \
+                                    newconstr not in new_table[newpaths]:
                                 print()
                                 print("    New path-constr pair",
                                       newpaths, newconstr)
-                        DP[i+1][newpaths].add(newconstr)  # Add to DP table
+                        new_table[newpaths].add(newconstr)  # Add to DP table
+        old_table = new_table
 
     if not silent:
         print("\nDone.")
-        print(DP[n-1])
+        print(new_table)
 
-    candidates = DP[n-1][PathConf.init(n-1, allpaths)]
+    candidates = new_table[PathConf.init(n-1, allpaths)]
     return candidates
+
