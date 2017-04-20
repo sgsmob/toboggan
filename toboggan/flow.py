@@ -401,10 +401,10 @@ class PathConf:
         return len(self.paths)
 
     def __repr__(self):
-        res = ""
+        res = "PathConf("
         for v in self.paths:
             res += "{}: {}, ".format(v, list(self.paths[v]))
-        return res[:-2]
+        return res[:-2] + ")"
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):

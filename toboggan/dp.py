@@ -127,7 +127,9 @@ def solve(instance, silent=True, guessed_weights=None):
         print(new_table)
 
     candidates = new_table[PathConf.init(n-1, allpaths)]
+    weights = []
     for e in candidates:
+        print("assign weights in dp.solve")
         weights = list(e.path_weights)
     return candidates, weights
 
@@ -154,6 +156,7 @@ def solve_and_recover(instance, weights, silent=True):
     backptrs = [initial_entries]
 
     # Run DP
+    debug_counter = 0
     for i in range(n-1):
         if not silent:
             print("")
@@ -172,8 +175,10 @@ def solve_and_recover(instance, weights, silent=True):
                 for e, P in dist:  # Paths P coincide on edge e
                     success = globalconstr.add_constraint(P, e)
                     if success is None:
+                        #print("Failure {}".format(new_paths))
                         break
                 else:
+                    #print("Success {}".format(new_paths))
                     entries[new_paths] = old_paths
 
         # add the new entries to the list of backpointers
@@ -181,7 +186,8 @@ def solve_and_recover(instance, weights, silent=True):
 
     if not silent:
         print("\nDone.")
-        print(backptrs[n-1])
+        for bp in backptrs:
+            print(bp)
 
     # recover the paths
     full_paths = [deque() for _ in weights]
@@ -192,18 +198,18 @@ def solve_and_recover(instance, weights, silent=True):
         for table in reversed(backptrs):
             #for v, incidence in conf:
             # CHANGE BECAUSE PathConf iteration doesn't return .items()
+            # print(table[conf])
             for v in conf:
                 incidence = conf[v]
                 # vertices might repeat in consecutive table entries if an edge
                 # is "long" wrt the topological ordering.  Don't add it twice
                 # to the path lists in this case.
                 for p in incidence:
-                    print(p)
-                    if len(full_paths[p]) == 0 or full_paths[p][-1] != v:
+                    if len(full_paths[p]) == 0 or full_paths[p][0] != v:
                         full_paths[p].appendleft(v)
             # traverse the pointer backwards
             conf = table[conf]
-    except ValueError as e:
+    except KeyError as e:
         raise Exception("The set of weights is not a valid solution") from e
 
     return full_paths
