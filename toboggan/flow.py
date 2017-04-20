@@ -385,6 +385,10 @@ class PathConf:
         return res
 
     def __iter__(self):
+        #return iter(self.paths.items())
+        # THIS CHANGE POTENTIALLY DANGEROUS
+        # so intead we didn't make this change,
+        #  and altered the way dp.solve_and_recover iterates over conf
         return iter(self.paths)
 
     def __contains__(self, v):

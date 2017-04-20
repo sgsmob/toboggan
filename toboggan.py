@@ -16,6 +16,7 @@ from toboggan.guess_weight import solve
 from toboggan.parser import read_instances_verbose
 from toboggan.graphs import cut_reconf
 from toboggan.flow import Instance
+from toboggan.dp import solve_and_recover
 
 # Timeout context, see
 #   http://stackoverflow.com/questions/2281850/timeout-function-if-it-takes-too-long-to-finish
@@ -147,7 +148,7 @@ for graphdata, k, index in read_instances_verbose(graph_file,
     print("{} {}:{} with n = {}, m = {}, and k = {}: ".format(
         index, graphname, graphnumber, n, m, k if k else "?"), flush=True)
 
-    # Reduce and reconfigure graph 
+    # Reduce and reconfigure graph
     reduced = cut_reconf(reduced)
 
     if k:
@@ -155,17 +156,19 @@ for graphdata, k, index in read_instances_verbose(graph_file,
         if maxtime:
             try:
                 with timeout(seconds=maxtime):
-                    solutions = solve(instance, silent=True)
+                    solutions, weights = solve(instance, silent=True)
                     elapsed = time.time() - start
                     print("Computation took {:.2f} seconds".format(elapsed))
                     print("Solutions:", solutions)
             except TimeoutError:
                 print("Timed out after {} seconds".format(maxtime))
         else:
-            solutions = solve(instance, silent=True)
+            solutions, weights = solve(instance, silent=True)
+            solution_paths = solve_and_recover(instance, weights)
             elapsed = time.time() - start
             print("Computation took {:.2f} seconds".format(elapsed))
             print("Solutions:", solutions)
+            print("Solutions:", solution_paths)
     else:
         if maxtime:
             try:
@@ -174,11 +177,11 @@ for graphdata, k, index in read_instances_verbose(graph_file,
                     solutions = None
                     while solutions == None:
                         instance = Instance(reduced, k)
-                        solutions = solve(instance, silent=True)
+                        solutions, weights = solve(instance, silent=True)
                         k += 1
                     elapsed = time.time() - start
                     print("Computation took {:.2f} seconds".format(elapsed))
-                    print("Solutions:", solutions)                        
+                    print("Solutions:", solutions)
             except TimeoutError:
                 print("Timed out after {} seconds".format(maxtime))
         else:
@@ -186,9 +189,9 @@ for graphdata, k, index in read_instances_verbose(graph_file,
             solutions = None
             while solutions == None:
                 instance = Instance(reduced, k)
-                solutions = solve(instance, silent=True)
+                solutions, weights = solve(instance, silent=True)
                 k += 1
             elapsed = time.time() - start
             print("Computation took {:.2f} seconds".format(elapsed))
-            print("Solutions:", solutions)        
-    print("")     
+            print("Solutions:", solutions)
+    print("")
