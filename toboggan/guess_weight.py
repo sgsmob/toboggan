@@ -95,7 +95,7 @@ def solve(instance, silent=True, max_weight_lower=1,
 
                 if not silent:
                     print("Trying weights", weights)
-                sol, w = solve_dp(instance, silent=True, guessed_weights=weights)
+                sol = solve_dp(instance, silent=True, guessed_weights=weights)
                 if len(sol) > 0:
                     if not silent:
                         try:
@@ -103,4 +103,4 @@ def solve(instance, silent=True, max_weight_lower=1,
                                 print(s, sum(s.path_weights), flow)
                         except AttributeError:
                             print("Unterdetermined solution")
-                    return sol, w
+                    return sol

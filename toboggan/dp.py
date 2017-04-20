@@ -5,15 +5,23 @@
 # under the three-clause BSD license; see LICENSE.
 #
 # python libs
-import time
 from operator import itemgetter
 from collections import defaultdict, deque
 
 # local imports
-from toboggan.flow import Instance, Constr, SolvedConstr, PathConf
+from toboggan.flow import Constr, SolvedConstr, PathConf
 
 
 def solve(instance, silent=True, guessed_weights=None):
+    """
+    Find a feasible set of weights consistent with guessed_weights.
+
+    guessed_weights is a sorted tuple of size k in which any of the entries
+    might be None.  If guessed_weights is k integers, check whether this
+    solution works.  If any entry of guessed_weights is None, check whether a
+    solution exists with each None replaced by a integer that respects the
+    sorted order of the tuple.
+    """
     dpgraph = instance.dpgraph
     k = instance.k
     n = instance.n
@@ -127,14 +135,11 @@ def solve(instance, silent=True, guessed_weights=None):
         print(new_table)
 
     candidates = new_table[PathConf.init(n-1, allpaths)]
-    weights = []
-    for e in candidates:
-        print("assign weights in dp.solve")
-        weights = list(e.path_weights)
-    return candidates, weights
+    return candidates
 
 
-def solve_and_recover(instance, weights, silent=True):
+def recover_paths(instance, weights, silent=True):
+    """Recover the paths that correspond to the weights given."""
     dpgraph = instance.dpgraph
     k = instance.k
     n = instance.n
@@ -156,7 +161,6 @@ def solve_and_recover(instance, weights, silent=True):
     backptrs = [initial_entries]
 
     # Run DP
-    debug_counter = 0
     for i in range(n-1):
         if not silent:
             print("")
@@ -175,10 +179,10 @@ def solve_and_recover(instance, weights, silent=True):
                 for e, P in dist:  # Paths P coincide on edge e
                     success = globalconstr.add_constraint(P, e)
                     if success is None:
-                        #print("Failure {}".format(new_paths))
+                        # print("Failure {}".format(new_paths))
                         break
                 else:
-                    #print("Success {}".format(new_paths))
+                    # print("Success {}".format(new_paths))
                     entries[new_paths] = old_paths
 
         # add the new entries to the list of backpointers
@@ -196,11 +200,14 @@ def solve_and_recover(instance, weights, silent=True):
         conf = PathConf.init(n-1, allpaths)
         # iterate over the backpointer list in reverse
         for table in reversed(backptrs):
-            #for v, incidence in conf:
+            # for v, incidence in conf:
             # CHANGE BECAUSE PathConf iteration doesn't return .items()
             # print(table[conf])
-            for v in conf:
-                incidence = conf[v]
+            for i in conf:
+                # translate into vertex from the original graph
+                v = instance.ordering[i]
+                # get the paths crossing this vertex
+                incidence = conf[i]
                 # vertices might repeat in consecutive table entries if an edge
                 # is "long" wrt the topological ordering.  Don't add it twice
                 # to the path lists in this case.
