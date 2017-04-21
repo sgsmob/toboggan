@@ -104,6 +104,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Splice flows into paths')
     parser.add_argument('file', help='a .graph file.'
                         ' Needs a .truth file in the same folder.')
+    parser.add_argument("--no_recovery",
+                        help="Only print the number of paths in an optimal"
+                        "decomposition, but do not recover the paths",
+                        action='store_true')
     parser.add_argument('--timeout', help='Timeout in seconds', type=int)
     parser.add_argument('--disprove', help='Run instance with parameter k-1 '
                         'instead of k (needs a .truth file)',
@@ -127,6 +131,12 @@ if __name__ == "__main__":
         print("# Timeout is set to", maxtime)
     else:
         print("# No timeout set")
+
+    recover = not args.no_recovery
+    if recover:
+        print("# Recovering paths")
+    else:
+        print("# Only printing path weights")
 
     instances = args.indices
     if instances:
@@ -182,11 +192,13 @@ if __name__ == "__main__":
         # Reduce and reconfigure graph
         reduced = cut_reconf(reduced)
 
+        # find the optimal solution size
         solution, k = find_opt_size(reduced, k, maxtime)
         print("Printing solution")
         print(type(solution))
         print(solution)
-        if bool(solution):
+        # recover the paths in an optimal solution
+        if bool(solution) and recover:
             print("Recovering the {} paths in the solution".format(k))
             weights = solution.pop().path_weights
             instance = Instance(reduced, k)
