@@ -163,10 +163,16 @@ class Constr:
         b_ub = Constr.ZERO_VECS[t-1]
         # Bounds for flow values: at least 1, at most F-(t-1) (since non-zero)
         bounds = self.instance.weight_bounds
-        optres = linprog(c, A_ub, b_ub, A_eq, b_eq, bounds)
 
-        if optres.status == 2:
-            # System is infeasible and therefore redundant.
+        # wrap linear program in try block to check when we have bounds that
+        # are invalid.
+        try:
+            optres = linprog(c, A_ub, b_ub, A_eq, b_eq, bounds)
+            if optres.status == 2:
+                # System is infeasible and therefore redundant.
+                return True
+        except ValueError as e:
+            # bounds that don't make sense indicate an infeasible system
             return True
 
         return False
