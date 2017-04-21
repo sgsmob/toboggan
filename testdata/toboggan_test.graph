@@ -1,4 +1,4 @@
-# graph number = 0 name = toboggan_test
+# graph number = 0 name = three_paths_10_20_20
 5
 0 1 20.00
 0 2 30.00
@@ -6,12 +6,12 @@
 1 3 40.00
 1 4 10.00
 3 4 40.00
-# graph number = 1 name = toboggan_test
+# graph number = 1 name = trivial_117
 4
 0 1 117.00
 1 2 117.00
 2 3 117.00
-# graph number = 2 name = toboggan_test
+# graph number = 2 name = three_paths_100_200_300
 5
 0 1 300.00
 0 2 300.00
@@ -19,7 +19,7 @@
 1 3 400.00
 1 4 200.00
 3 4 400.00
-# graph number = 3 name = toboggan_test
+# graph number = 3 name = four_paths_25_25_50_50
 5
 0 1 25.00
 0 2 50.00
@@ -29,13 +29,13 @@
 1 4 50.00
 2 4 50.00
 3 4 50.00
-# graph number = 4 name = toboggan_test
+# graph number = 4 name = two_paths_1_8
 4
 0 1 1.00
 1 3 1.00
 0 2 8.00
 2 3 8.00
-# graph number = 5 name = toboggan_test
+# graph number = 5 name = six_paths_10_20_30_40_100_100
 6
 0 1 100.00
 0 1 60.00

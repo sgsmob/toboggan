@@ -85,7 +85,7 @@ def find_opt_size(graph, k, maxtime):
             while True:
                 instance = Instance(graph, k)
                 solutions = solve(instance, silent=True)
-                if len(solutions) > 0:
+                if bool(solutions):
                     break
                 k += 1
             elapsed = time.time() - start
@@ -183,7 +183,10 @@ if __name__ == "__main__":
         reduced = cut_reconf(reduced)
 
         solution, k = find_opt_size(reduced, k, maxtime)
-        if len(solution) > 0:
+        print("Printing solution")
+        print(type(solution))
+        print(solution)
+        if bool(solution):
             print("Recovering the {} paths in the solution".format(k))
             weights = solution.pop().path_weights
             instance = Instance(reduced, k)
