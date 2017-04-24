@@ -102,9 +102,14 @@ def solve(instance, silent=True, max_weight_lower=1,
     for diff in range(k+1):
         if not silent:
             print("Diff =", diff)
-        # iterate over positions of guessed weights
-        for indices in itertools.combinations(positions, k-diff):
+        # iterate over positions of guessed weights.  We want them to be
+        # ordered, but choose the smallest first to be removed
+        for rev_indices in itertools.combinations(reversed(positions), k-diff):
+            indices = list(reversed(rev_indices))
             p = len(indices)
+            # when k-1 values are determined, it also determines the kth value
+            if p == k-1:
+                continue
             # iterate over choices for those guessed weights
             for chosen_weights in itertools.combinations(feasible_weights, p):
                 weights = [None] * k
