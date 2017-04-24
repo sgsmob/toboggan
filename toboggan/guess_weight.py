@@ -7,16 +7,11 @@
 # -*- coding: utf-8 -*-
 # python libs
 import sys
-import time
-import argparse
 import itertools
-import os.path as path
-
 # local imports
-from toboggan.graphs import cut_reconf
 from toboggan.flow import Instance
-from toboggan.parser import read_instances_verbose
 from toboggan.dp import solve as solve_dp
+
 
 # Print iterations progress
 def print_progress(iteration, total, prefix='', suffix='', decimals=1,
@@ -71,8 +66,7 @@ def solve(instance, silent=True, max_weight_lower=1,
     flow = instance.flow
     k = instance.k
 
-    max_weight = Instance.compute_max_weight_bounds(instance.dpgraph, k,
-                                                    flow)[1]
+    max_weight = instance.max_weight_bounds[1]
     feasible_weights = list(filter(lambda w: w <= max_weight,
                                    instance.weights))
 
