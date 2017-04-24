@@ -4,7 +4,7 @@
 # under the three-clause BSD license; see LICENSE.
 #
 from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
-                            top_sorting_graph_representation
+                            compute_edge_cuts, top_sorting_graph_representation
 from toboggan.partition import algorithm_u
 from operator import itemgetter
 import itertools
@@ -27,6 +27,7 @@ class Instance:
         self.ordering = convert_to_top_sorting(graph)
         self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
         self.cuts = compute_cuts(self.dpgraph)
+        self.edge_cuts = compute_edge_cuts(self.dpgraph, self.cuts)
         self.n = len(self.dpgraph)
         self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
 
@@ -109,11 +110,7 @@ class Instance:
         We look over all s-t edge cuts consistent with the topological ordering
         and pick the largest.
         """
-        # edge cut size is the number of neighbors out of the cut
-        edge_cut_sizes = [sum(len(self.dpgraph[i]) for i in C)
-                          for C in self.cuts]
-
-        max_edge_cut = max(edge_cut_sizes)
+        max_edge_cut = max(len(C) for C in self.edge_cuts)
         lower_bound = max_edge_cut
         # let the user know their guess was bad if it was
         if k is not None and lower_bound > k:

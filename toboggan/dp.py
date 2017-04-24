@@ -39,21 +39,6 @@ def solve(instance, silent=True, guessed_weights=None):
             continue
         globalconstr = globalconstr.add_constraint([index], (0, guess))
 
-    # Check whether there is a cut-vertex of out-degree k,
-    # this lets us derive the path values directly.
-    # Also check whether any active set has size larger than k, in which case
-    # this is a no-instance
-    for i, cut in enumerate(instance.cuts):
-        if len(cut) > k:
-            return set()  # Early out: no solution
-        if len(cut) == 1 and len(dpgraph[i]) == k:
-            # Important: path weights must be sorted, otherwise our
-            # subsequent optimizations will remove this constraint.
-            weights = sorted(map(itemgetter(1), dpgraph[i]))
-            if not silent:
-                print("Found bottleneck. Path weights are {}".format(weights))
-            globalconstr = SolvedConstr(weights, instance)
-
     # Build first DP table
     old_table = defaultdict(set)
     allpaths = frozenset(range(k))

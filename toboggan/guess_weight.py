@@ -69,6 +69,15 @@ def solve(instance, silent=True, max_weight_lower=1,
     if instance.has_bad_bounds():
         return set()
 
+    # if k equals the size of the largest edge cut, the weights are
+    # predetermined
+    if instance.k == max(len(C) for C in instance.edge_cuts):
+        largest_cut = max(instance.edge_cuts, key=len)
+        # Important: path weights must be sorted, otherwise our
+        # subsequent optimizations will remove this constraint.
+        weights = list(sorted(w for _, w in largest_cut))
+        return solve_dp(instance, silent=True, guessed_weights=weights)
+
     max_weight = instance.max_weight_bounds[1]
     feasible_weights = list(filter(lambda w: w <= max_weight,
                                    instance.weights))
