@@ -3,13 +3,18 @@
 # and is Copyright (C) North Carolina State University, 2017. It is licensed
 # under the three-clause BSD license; see LICENSE.
 #
-from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
-                            top_sorting_graph_representation
-from toboggan.partition import algorithm_u
+# python libs
+import math
+from collections import defaultdict
 from operator import itemgetter
 import itertools
 import numpy as np
 from scipy.optimize import linprog
+
+# local imports
+from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
+                            top_sorting_graph_representation
+from toboggan.partition import algorithm_u
 
 
 class Instance:
@@ -99,15 +104,42 @@ class Instance:
         for i in range(1, self.k-1):
             lower = max(bounds[i][0], (self.flow-uppersum[i+1]) // i)
             bounds[i] = (lower, bounds[i][1])
-
         return np.array(bounds)
+
+    def _larger_multiset_diff(list1, list2):
+        """
+        Treat twolists as multisets, return list1-list2.
+        Note: input lists should contain int or float type.
+        """
+        # convert to dicts with contents as keys, multiplicities as vals
+        dict1 = defaultdict(int)
+        for item in list1:
+            dict1[item] += 1
+        dict2 = defaultdict(int)
+        for item in list2:
+            dict2[item] += 1
+        diffsum12 = 0
+        for key, val in dict1.items():
+            temp_diff = val - dict2[key]
+            if temp_diff > 0:
+                diffsum12 += temp_diff
+        diffsum21 = 0
+        for key, val in dict2.items():
+            temp_diff = val - dict1[key]
+            if temp_diff > 0:
+                diffsum21 += temp_diff
+
+        return max(diffsum12, diffsum21)
 
     def _optimal_size_lower_bound(self, k):
         """
         Get a lower bound on the optimal solution size.
 
         We look over all s-t edge cuts consistent with the topological ordering
-        and pick the largest.
+        and pick the largest. Then we look over all pairs of cut-sets that are
+        large enough to further improve this lower-bound and check whether the
+        number of distinct edge-weights requires a larger lower-bound than
+        merely the largest cut-set size.
         """
         # edge cut size is the number of neighbors out of the cut
         edge_cut_sizes = [sum(len(self.dpgraph[i]) for i in C)
@@ -115,12 +147,45 @@ class Instance:
 
         max_edge_cut = max(edge_cut_sizes)
         lower_bound = max_edge_cut
+
+        # Now check all pairs of cutsets "large enough" for better bound
+        sorted_cut_sizes = sorted((cut_size, which_cut) for which_cut, cut_size
+                                  in enumerate(edge_cut_sizes))
+        cutsets_for_best_bound = []
+        # Starting with largest, iterate over cutsets
+        for idx1 in range(len(sorted_cut_sizes)):
+            current_size1, which_cut1 = sorted_cut_sizes[idx1]
+            # once one set is too small, all following will be, so break out
+            if math.ceil(current_size1/2) + current_size1 <= lower_bound:
+                break
+            for idx2 in range(idx1+1, len(sorted_cut_sizes)):
+                current_size2, which_cut2 = sorted_cut_sizes[idx2]
+                # if cutsize2 too small, the rest will be: break inner for loop
+                temp_bound = min(current_size1, current_size2) + math.ceil(
+                    max(current_size1, current_size2)/2)
+                if temp_bound <= lower_bound:
+                    break
+                # Now compute actual bound for this pair of cutsets;
+                # Get weights for each cutset as a multiset,
+                # compute size of (larger) difference
+                weights1 = set([w for _, w in self.dpgraph[which_cut1]])
+                weights2 = set([w for _, w in self.dpgraph[which_cut2]])
+                multiset_diff = self._larger_multiset_diff(weights1, weights2)
+                bound = math.ceil(multiset_diff/2) + min(current_size1,
+                                                         current_size2)
+                # Check if we need to update bound
+                if bound < lowerbound:
+                    lowerbound = bound
+                    cutsets_for_best_bound = [which_cut1, which_cut2]
         # let the user know their guess was bad if it was
-        if k is not None and lower_bound > k:
+        if k is not None and lowerbound > k:
             print("Graph has an edge cut of size {}. "
-                  "User supplied k value of {} will be replaced with"
-                  "{}".format(lower_bound, k, lower_bound))
-        return lower_bound
+                  "Further investigating cutsets yields best bound is {}. "
+                  "User supplied k value of {}. Continuing using k = {}"
+                  "".format(max_edge_cut, lowerbound, k))
+            return lower_bound, cutsets_for_best_bound
+        else:
+            return k
 
     def try_larger_k(self):
         """
@@ -134,6 +199,7 @@ class Instance:
         self.max_weight_bounds = self._compute_max_weight_bounds()
         # compute bounds on the individual weights
         self.weight_bounds = self._compute_weight_bounds()
+
 
 class Constr:
     """
@@ -421,7 +487,7 @@ class PathConf:
         return res
 
     def __iter__(self):
-        #return iter(self.paths.items())
+        # return iter(self.paths.items())
         # THIS CHANGE POTENTIALLY DANGEROUS
         # so intead we didn't make this change,
         #  and altered the way dp.solve_and_recover iterates over conf
