@@ -29,27 +29,9 @@ def solve(instance, silent=True, guessed_weights=None):
     if not silent:
         print(dpgraph)
 
-    if instance.max_weight_bounds[0] > instance.max_weight_bounds[1]:
-        return set()  # Instance is not feasible
     # The only constraint a priori is the total flow value
     globalconstr = Constr(instance)
     guessed_weights = [None]*k if not guessed_weights else guessed_weights
-
-    # We sometimes obtain tight bounds for the highest weight. This either
-    # gives us the highest weight for free or contradicts a guessed weight.
-    if instance.max_weight_bounds[0] == instance.max_weight_bounds[1]:
-        if guessed_weights[-1] is None:
-            guessed_weights[-1] = instance.max_weight_bounds[0]
-        elif guessed_weights[-1] != instance.max_weight_bounds[0]:
-            return set()  # Guessed weights not feasible
-
-    # If there exists a weight-one edge we know what the smallest weight
-    # should be.
-    if min(instance.weights) == 1:
-        if guessed_weights[0] is None:
-            guessed_weights[0] = 1
-        elif guessed_weights[0] != 1:
-            return set()  # Guessed weights not feasible
 
     assert len(guessed_weights) == k
     for index, guess in enumerate(guessed_weights):

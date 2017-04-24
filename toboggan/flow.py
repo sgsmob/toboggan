@@ -135,6 +135,18 @@ class Instance:
         # compute bounds on the individual weights
         self.weight_bounds = self._compute_weight_bounds()
 
+    def has_bad_bounds(self):
+        """Check whether weight bounds disallow all solutions."""
+        # upper weight bounds miss each other
+        if self.max_weight_bounds[0] > self.max_weight_bounds[1]:
+            return True
+        # lower and upper bounds of each weight position miss each other
+        for lower, upper in self.weight_bounds:
+            if lower > upper:
+                return True
+        # otherwise all good
+        return False
+
 class Constr:
     """
         Class representing linear constraints imposed on path

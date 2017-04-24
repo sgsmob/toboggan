@@ -9,7 +9,6 @@
 import sys
 import itertools
 # local imports
-from toboggan.flow import Instance
 from toboggan.dp import solve as solve_dp
 
 
@@ -66,6 +65,10 @@ def solve(instance, silent=True, max_weight_lower=1,
     flow = instance.flow
     k = instance.k
 
+    # quit right away if the instance has weight bounds that can't be satisfied
+    if instance.has_bad_bounds():
+        return set()
+
     max_weight = instance.max_weight_bounds[1]
     feasible_weights = list(filter(lambda w: w <= max_weight,
                                    instance.weights))
@@ -73,17 +76,41 @@ def solve(instance, silent=True, max_weight_lower=1,
     if not silent:
         print(instance.weights, feasible_weights)
 
-    positions = list(range(k))
+    # figure out whether we get the first or last positions for free
+    largest_free = False
+    smallest_free = False
+    # check largest weight first
+    if instance.max_weight_bounds[0] == instance.max_weight_bounds[1]:
+        largest_free = True
+        largest = instance.max_weight_bounds[0]
+    if min(instance.weights) == 1:
+        smallest_free = True
+        smallest = 1
+
+    positions = list(range(int(smallest_free), k-int(largest_free)))
+
+    # iterate over the number of unguessed weights
     for diff in range(k+1):
         if not silent:
             print("Diff =", diff)
+        # iterate over positions of guessed weights
         for indices in itertools.combinations(positions, k-diff):
             p = len(indices)
+            # iterate over choices for those guessed weights
             for chosen_weights in itertools.combinations(feasible_weights, p):
                 weights = [None] * k
+
+                # assign the chosen weights to the guessed positions
                 for p, w in zip(indices, chosen_weights):
                     weights[p] = w
 
+                # add in free values
+                if smallest_free:
+                    weights[0] = smallest
+                if largest_free:
+                    weights[k-1] = largest
+
+                # quit if this didn't work
                 if not is_feasible(weights, flow, max_weight):
                     continue
 
