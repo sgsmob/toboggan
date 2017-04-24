@@ -74,27 +74,24 @@ def index_range(raw):
     return indices
 
 
-def find_opt_size(graph, k, maxtime):
+def find_opt_size(instance, maxtime):
     """Find the optimum size of a flow decomposition."""
     if maxtime is None:
         maxtime = -1
-    if k is None:
-        k = 1
     try:
         with timeout(seconds=maxtime):
             while True:
-                instance = Instance(graph, k)
                 solutions = solve(instance, silent=True)
                 if bool(solutions):
                     break
-                k += 1
+                instance.try_larger_k()
             elapsed = time.time() - start
             print("Computation took {:.2f} seconds".format(elapsed))
             print("Solutions:", solutions)
-            return solutions, k
+            return solutions
     except TimeoutError:
         print("Timed out after {} seconds".format(maxtime))
-        return set(), k
+        return set()
 
 
 if __name__ == "__main__":
@@ -191,16 +188,16 @@ if __name__ == "__main__":
 
         # Reduce and reconfigure graph
         reduced = cut_reconf(reduced)
+        instance = Instance(reduced, k)
 
         # find the optimal solution size
-        solution, k = find_opt_size(reduced, k, maxtime)
-        print("Printing solution")
-        print(type(solution))
-        print(solution)
+        solution = find_opt_size(instance, maxtime)
         # recover the paths in an optimal solution
         if bool(solution) and recover:
-            print("Recovering the {} paths in the solution".format(k))
             weights = solution.pop().path_weights
-            instance = Instance(reduced, k)
+            print("Recovering the {} paths in the solution {}".format(
+                                                                instance.k,
+                                                                weights))
             paths = recover_paths(instance, weights)
             print(paths)
+        print()

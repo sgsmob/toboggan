@@ -3,34 +3,48 @@
 # and is Copyright (C) North Carolina State University, 2017. It is licensed
 # under the three-clause BSD license; see LICENSE.
 #
-from toboggan.graphs import convert_to_top_sorting, top_sorting_graph_representation
+from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
+                            top_sorting_graph_representation
 from toboggan.partition import algorithm_u
 from operator import itemgetter
 import itertools
 import numpy as np
 from scipy.optimize import linprog
 
-class Instance:
-    def __init__(self, graph, k):
-        self.graph = graph
-        self.k = k
 
+class Instance:
+    """
+    Information about an input instance to flow decomposition.
+
+    Maintains a topological ordering of the graph, the flow, and bounds on the
+    feasible path weights.
+    """
+
+    def __init__(self, graph, k=None):
+        """Create an instance from a graph and guess for the solution size."""
+        # information about the graph and its ordering
+        self.graph = graph
         self.ordering = convert_to_top_sorting(graph)
         self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
-
+        self.cuts = compute_cuts(self.dpgraph)
         self.n = len(self.dpgraph)
         self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
+
+        # get a lower bound on the number of paths needed
+        # We pass the input k to this function so it can inform the user if
+        # the input k can be easily identified as too small.
+        self.k = self._optimal_size_lower_bound(k)
+
+        # our initial guesses for weights will come from the flow values
         self.weights = sorted(set([w for _, _, w in self.graph.edges()]))
 
-        self.max_weight_bounds = Instance.compute_max_weight_bounds(
-                                 self.dpgraph, self.k, self.flow)
-        self.weight_bounds = Instance.compute_weight_bounds(
-                             self.max_weight_bounds, self.weights, self.k,
-                             self.flow)
-
-        self.cuts = Instance.compute_cuts(self.dpgraph)
+        # compute bounds on the largest weight
+        self.max_weight_bounds = self._compute_max_weight_bounds()
+        # compute bounds on the individual weights
+        self.weight_bounds = self._compute_weight_bounds()
 
     def info(self):
+        """A string representation of this object."""
         print("n = {}, m = {}, k = {}.".format(len(self.graph),
                                                self.graph.num_edges(), self.k))
         print("Weights:", self.weights)
@@ -40,70 +54,86 @@ class Instance:
         print("Cut-representation:")
         print(self.cuts)
 
-    @staticmethod
-    def compute_cuts(dpgraph):
-        n = len(dpgraph)
-        cuts = [None] * (n)
-        cuts[0] = set([0])
-
-        for i in range(n-1):
-            # Remove i from active set, add neighbors
-            cuts[i+1] = set(cuts[i])
-            cuts[i+1].remove(i)
-            for t, w in dpgraph[i]:
-                cuts[i+1].add(t)
-        return cuts
-
-    @staticmethod
-    def compute_max_weight_bounds(dpgraph, k, flow):
+    def _compute_max_weight_bounds(self):
         # Get lower bound for highest weight
         min_max_weight = 1
-        for out in dpgraph:
+        for out in self.dpgraph:
             degree = len(out)
             for _, w in out:
-                if k-degree+1 <= 0:
+                if self.k-degree+1 <= 0:
                     continue  # Instance is infeasible, will be caught later
-                min_max_weight = max(min_max_weight, w // (k-degree+1))
+                min_max_weight = max(min_max_weight, w // (self.k-degree+1))
 
         # Compute heaviest possible path in graph
-        maxpath = [0] * len(dpgraph)
-        maxpath[0] = flow
-        for v, out in enumerate(dpgraph):
+        maxpath = [0 for _ in range(self.n)]
+        maxpath[0] = self.flow
+        for v, out in enumerate(self.dpgraph):
             for u, w in out:
                 maxpath[u] = max(maxpath[u], min(w, maxpath[v]))
 
         return (min_max_weight, maxpath[-1])
 
-    @staticmethod
-    def compute_weight_bounds(max_weight_bounds, weights, k, flow):
+    def _compute_weight_bounds(self):
         supseq = []
         summed = 0
-        for w in weights:
-            if w > max_weight_bounds[1]:
+        for w in self.weights:
+            if w > self.max_weight_bounds[1]:
                 break
             if w > summed:
                 supseq.append(w)
                 summed += w
-        while len(supseq) < k:  # Sentinel elements
-            supseq.append(max_weight_bounds[1])
+        while len(supseq) < self.k:  # Sentinel elements
+            supseq.append(self.max_weight_bounds[1])
 
-        bounds = [(1, w) for w in supseq[:k]]
-        bounds[-1] = max_weight_bounds
+        bounds = [(1, w) for w in supseq[:self.k]]
+        bounds[-1] = self.max_weight_bounds
 
         uppersum = [u for _, u in bounds]
-        for i in reversed(range(k-1)):
+        for i in reversed(range(self.k-1)):
             uppersum[i] += uppersum[i+1]
 
         # Refine lower bounds by using upper bounds:
         # the weight of path i must be at least F_i / i
         # where F_i is an upper bound on how much flow all paths > i
         # take up.
-        for i in range(1, k-1):
-            lower = max(bounds[i][0], (flow-uppersum[i+1]) // i)
+        for i in range(1, self.k-1):
+            lower = max(bounds[i][0], (self.flow-uppersum[i+1]) // i)
             bounds[i] = (lower, bounds[i][1])
 
         return np.array(bounds)
 
+    def _optimal_size_lower_bound(self, k):
+        """
+        Get a lower bound on the optimal solution size.
+
+        We look over all s-t edge cuts consistent with the topological ordering
+        and pick the largest.
+        """
+        # edge cut size is the number of neighbors out of the cut
+        edge_cut_sizes = [sum(len(self.dpgraph[i]) for i in C)
+                          for C in self.cuts]
+
+        max_edge_cut = max(edge_cut_sizes)
+        lower_bound = max_edge_cut
+        # let the user know their guess was bad if it was
+        if k is not None and lower_bound > k:
+            print("Graph has an edge cut of size {}. "
+                  "User supplied k value of {} will be replaced with"
+                  "{}".format(lower_bound, k, lower_bound))
+        return lower_bound
+
+    def try_larger_k(self):
+        """
+        Increase the value of k by 1.
+
+        We need to do this in a method in order to update internal data
+        structures about the weights.
+        """
+        self.k = self.k + 1
+        # compute bounds on the largest weight
+        self.max_weight_bounds = self._compute_max_weight_bounds()
+        # compute bounds on the individual weights
+        self.weight_bounds = self._compute_weight_bounds()
 
 class Constr:
     """

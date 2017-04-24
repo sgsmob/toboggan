@@ -360,6 +360,20 @@ def top_sorting_graph_representation(graph, ordering):
     return res
 
 
+def compute_cuts(dpgraph):
+    n = len(dpgraph)
+    cuts = [None] * (n)
+    cuts[0] = set([0])
+
+    for i in range(n-1):
+        # Remove i from active set, add neighbors
+        cuts[i+1] = set(cuts[i])
+        cuts[i+1].remove(i)
+        for t, w in dpgraph[i]:
+            cuts[i+1].add(t)
+    return cuts
+
+
 def cut_reconf(graph):
     """
     Decomposes the graph into blocks and re-orders them, with the blocks
