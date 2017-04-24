@@ -29,48 +29,15 @@ def solve(instance, silent=True, guessed_weights=None):
     if not silent:
         print(dpgraph)
 
-    if instance.max_weight_bounds[0] > instance.max_weight_bounds[1]:
-        return set()  # Instance is not feasible
     # The only constraint a priori is the total flow value
     globalconstr = Constr(instance)
     guessed_weights = [None]*k if not guessed_weights else guessed_weights
-
-    # We sometimes obtain tight bounds for the highest weight. This either
-    # gives us the highest weight for free or contradicts a guessed weight.
-    if instance.max_weight_bounds[0] == instance.max_weight_bounds[1]:
-        if guessed_weights[-1] is None:
-            guessed_weights[-1] = instance.max_weight_bounds[0]
-        elif guessed_weights[-1] != instance.max_weight_bounds[0]:
-            return set()  # Guessed weights not feasible
-
-    # If there exists a weight-one edge we know what the smallest weight
-    # should be.
-    if min(instance.weights) == 1:
-        if guessed_weights[0] is None:
-            guessed_weights[0] = 1
-        elif guessed_weights[0] != 1:
-            return set()  # Guessed weights not feasible
 
     assert len(guessed_weights) == k
     for index, guess in enumerate(guessed_weights):
         if guess is None:
             continue
         globalconstr = globalconstr.add_constraint([index], (0, guess))
-
-    # Check whether there is a cut-vertex of out-degree k,
-    # this lets us derive the path values directly.
-    # Also check whether any active set has size larger than k, in which case
-    # this is a no-instance
-    for i, cut in enumerate(instance.cuts):
-        if len(cut) > k:
-            return set()  # Early out: no solution
-        if len(cut) == 1 and len(dpgraph[i]) == k:
-            # Important: path weights must be sorted, otherwise our
-            # subsequent optimizations will remove this constraint.
-            weights = sorted(map(itemgetter(1), dpgraph[i]))
-            if not silent:
-                print("Found bottleneck. Path weights are {}".format(weights))
-            globalconstr = SolvedConstr(weights, instance)
 
     # Build first DP table
     old_table = defaultdict(set)

@@ -6,6 +6,7 @@
 import copy
 from collections import defaultdict
 from operator import itemgetter
+import itertools
 
 
 class AdjList:
@@ -303,6 +304,25 @@ def compute_cuts(dpgraph):
         for t, w in dpgraph[i]:
             cuts[i+1].add(t)
     return cuts
+
+
+def compute_edge_cuts(dpgraph, cuts=None):
+    """Compute the edge cuts corresponding to the vertex cuts."""
+    if cuts is None:
+        cuts = compute_edge_cuts(dpgraph)
+    e_cuts = []
+    # make a new entry for each vertex cut
+    for C in cuts:
+        eC = []
+        # aggregate over all out-edges
+        for i in C:
+            # aggregate over the out-edges of each vertex
+            for j, w in dpgraph[i]:
+                # don't include edges that stay in C
+                if j not in C:
+                    eC.append((j, w))
+        e_cuts.append(eC)
+    return e_cuts
 
 
 def cut_reconf(graph):

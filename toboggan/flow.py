@@ -13,7 +13,7 @@ from scipy.optimize import linprog
 
 # local imports
 from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
-                            top_sorting_graph_representation
+                            compute_edge_cuts, top_sorting_graph_representation
 from toboggan.partition import algorithm_u
 
 
@@ -32,6 +32,7 @@ class Instance:
         self.ordering = convert_to_top_sorting(graph)
         self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
         self.cuts = compute_cuts(self.dpgraph)
+        self.edge_cuts = compute_edge_cuts(self.dpgraph, self.cuts)
         self.n = len(self.dpgraph)
         self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
 
@@ -141,10 +142,7 @@ class Instance:
         number of distinct edge-weights requires a larger lower-bound than
         merely the largest cut-set size.
         """
-        # edge cut size is the number of neighbors out of the cut
-        edge_cut_sizes = [sum(len(self.dpgraph[i]) for i in C)
-                          for C in self.cuts]
-
+        edge_cut_sizes = [len(C) for C in self.edge_cuts]
         max_edge_cut = max(edge_cut_sizes)
         lower_bound = max_edge_cut
 
@@ -174,16 +172,18 @@ class Instance:
                 bound = math.ceil(multiset_diff/2) + min(current_size1,
                                                          current_size2)
                 # Check if we need to update bound
-                if bound < lowerbound:
-                    lowerbound = bound
+                if bound < lower_bound:
+                    lower_bound = bound
                     cutsets_for_best_bound = [which_cut1, which_cut2]
         # let the user know their guess was bad if it was
-        if k is not None and lowerbound > k:
+        if k is not None and lower_bound > k:
             print("Graph has an edge cut of size {}. "
                   "Further investigating cutsets yields best bound is {}. "
                   "User supplied k value of {}. Continuing using k = {}"
-                  "".format(max_edge_cut, lowerbound, k))
+                  "".format(max_edge_cut, lower_bound, k))
             return lower_bound, cutsets_for_best_bound
+        elif k is None:
+            return lower_bound
         else:
             return k
 
@@ -199,6 +199,18 @@ class Instance:
         self.max_weight_bounds = self._compute_max_weight_bounds()
         # compute bounds on the individual weights
         self.weight_bounds = self._compute_weight_bounds()
+
+    def has_bad_bounds(self):
+        """Check whether weight bounds disallow all solutions."""
+        # upper weight bounds miss each other
+        if self.max_weight_bounds[0] > self.max_weight_bounds[1]:
+            return True
+        # lower and upper bounds of each weight position miss each other
+        for lower, upper in self.weight_bounds:
+            if lower > upper:
+                return True
+        # otherwise all good
+        return False
 
 
 class Constr:
