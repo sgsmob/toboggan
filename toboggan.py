@@ -81,6 +81,7 @@ def find_opt_size(instance, maxtime):
     try:
         with timeout(seconds=maxtime):
             while True:
+                print("\tCalling guess_weight with k = {}".format(instance.k))
                 solutions = solve(instance, silent=True)
                 if bool(solutions):
                     break
@@ -106,6 +107,8 @@ if __name__ == "__main__":
                         "decomposition, but do not recover the paths",
                         action='store_true')
     parser.add_argument('--timeout', help='Timeout in seconds', type=int)
+    parser.add_argument('--skip_truth', help='Skip checking .truth',
+                        action='store_true')
     parser.add_argument('--disprove', help='Run instance with parameter k-1 '
                         'instead of k (needs a .truth file)',
                         action='store_true')
@@ -155,10 +158,11 @@ if __name__ == "__main__":
     else:
         print("# Running on all instances")
 
-    if path.isfile(truth_file):
-        print("# Using ground-truth from file {}".format(truth_file))
+    if not args.skip_truth:
+        if path.isfile(truth_file):
+            print("# Using ground-truth from file {}".format(truth_file))
     else:
-        print("# No ground-truth found. Guessing parameter.".format(
+        print("# Not using ground-truth. Guessing parameter.".format(
                 truth_file))
         truth_file = None
 
@@ -183,7 +187,7 @@ if __name__ == "__main__":
         if args.disprove and k:
             k = k - 1
             print("# Using parameter k-1")
-        print("{} {}:{} with n = {}, m = {}, and k = {}: ".format(
+        print("{} {}:{} with n = {}, m = {}, and truth = {}: ".format(
             index, graphname, graphnumber, n, m, k if k else "?"), flush=True)
 
         # Reduce and reconfigure graph
@@ -195,9 +199,12 @@ if __name__ == "__main__":
         # recover the paths in an optimal solution
         if bool(solution) and recover:
             weights = solution.pop().path_weights
+            start_path_time = time.time()
             print("Recovering the {} paths in the solution {}".format(
                                                                 instance.k,
                                                                 weights))
             paths = recover_paths(instance, weights)
+            elapsed_path_time = time.time() - start_path_time
+            print("Path computation took {:.2f} seconds".format(elapsed_path_time))
             print(paths)
         print()
