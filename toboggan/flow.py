@@ -180,7 +180,7 @@ class Instance:
             print("Graph has an edge cut of size {}. "
                   "Further investigating cutsets yields best bound is {}. "
                   "User supplied k value of {}. Continuing using k = {}"
-                  "".format(max_edge_cut, lower_bound, k))
+                  "".format(max_edge_cut, lower_bound, k, lower_bound))
             return lower_bound, cutsets_for_best_bound
         elif k is None:
             return lower_bound
