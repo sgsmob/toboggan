@@ -109,7 +109,7 @@ class Instance:
         # where F_i is an upper bound on how much flow all paths > i
         # take up.
         for i in range(1, self.k-1):
-            lower = max(bounds[i][0], (self.flow-uppersum[i+1]) // i)
+            lower = max(bounds[i][0], (self.flow-uppersum[i+1]) // (i+1))
             bounds[i] = (lower, bounds[i][1])
         return np.array(bounds)
 
