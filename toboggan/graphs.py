@@ -306,23 +306,28 @@ def compute_cuts(dpgraph):
     return cuts
 
 
-def compute_edge_cuts(dpgraph, cuts=None):
-    """Compute the edge cuts corresponding to the vertex cuts."""
-    if cuts is None:
-        cuts = compute_edge_cuts(dpgraph)
-    e_cuts = []
-    # make a new entry for each vertex cut
-    for C in cuts:
+def compute_edge_cuts(dpgraph):
+    """Compute the topological edge cuts."""
+    # Contains endpoints and weights for arcs in each topological cut
+    top_cuts = []
+    # Contains the iteratively constructed top-edge-cut.
+    # key is a node; value is a list of weights of arcs ending at key
+    current_bin = defaultdict(list)
+
+    # iterate over nodes in top ordering
+    for v in range(len(dpgraph)):
+        v_neighborhood = dpgraph[v]
+        # remove from iterative cut-set the arcs ending at current node
+        current_bin[v] = []
+        for u, w in v_neighborhood:
+            current_bin[u].append(w)
+        # current cut-set done, add it to the output
         eC = []
-        # aggregate over all out-edges
-        for i in C:
-            # aggregate over the out-edges of each vertex
-            for j, w in dpgraph[i]:
-                # don't include edges that stay in C
-                if j not in C:
-                    eC.append((j, w))
-        e_cuts.append(eC)
-    return e_cuts
+        for u, weights in current_bin.items():
+            eC.extend((u, weight) for weight in weights)
+        top_cuts.append(eC)
+
+    return top_cuts
 
 
 def cut_reconf(graph):

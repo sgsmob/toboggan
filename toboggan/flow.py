@@ -32,7 +32,7 @@ class Instance:
         self.ordering = convert_to_top_sorting(graph)
         self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
         self.cuts = compute_cuts(self.dpgraph)
-        self.edge_cuts = compute_edge_cuts(self.dpgraph, self.cuts)
+        self.edge_cuts = compute_edge_cuts(self.dpgraph)
         self.n = len(self.dpgraph)
         self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
 
@@ -483,14 +483,11 @@ class SolvedConstr:
 
 class PathConf:
     """Class representing paths ending in a set of vertices."""
-    def __init__(self):
+    
+    def __init__(self, vertex=None, paths=None):
         self.paths = {}
-
-    @staticmethod
-    def init(vertex, paths):
-        res = PathConf()
-        res.paths[vertex] = frozenset(paths)
-        return res
+        if vertex is not None:
+            self.paths[vertex] = frozenset(paths)
 
     def copy(self):
         res = PathConf()
