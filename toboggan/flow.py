@@ -32,7 +32,7 @@ class Instance:
         self.ordering = convert_to_top_sorting(graph)
         self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
         self.cuts = compute_cuts(self.dpgraph)
-        self.edge_cuts = compute_edge_cuts(self.dpgraph, self.cuts)
+        self.edge_cuts = compute_edge_cuts(self.dpgraph)
         self.n = len(self.dpgraph)
         self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
 
