@@ -5,7 +5,6 @@
 # under the three-clause BSD license; see LICENSE.
 #
 # python libs
-from operator import itemgetter
 from collections import defaultdict, deque
 
 # local imports
@@ -43,7 +42,7 @@ def solve(instance, silent=True, guessed_weights=None):
     old_table = defaultdict(set)
     allpaths = frozenset(range(k))
     # All k paths `end' at source
-    old_table[PathConf.init(0, allpaths)] = set([globalconstr])
+    old_table[PathConf(0, allpaths)] = set([globalconstr])
 
     # Run DP
     for i in range(n-1):
@@ -101,7 +100,7 @@ def solve(instance, silent=True, guessed_weights=None):
         print("\nDone.")
         print(new_table)
 
-    candidates = new_table[PathConf.init(n-1, allpaths)]
+    candidates = new_table[PathConf(n-1, allpaths)]
     return candidates
 
 
@@ -124,7 +123,7 @@ def recover_paths(instance, weights, silent=True):
     # Build DP table, which will map path configurations to the path
     # configurations in the previous tables that yielded the specific entry
     # All k paths start at the source vertex
-    initial_entries = {PathConf.init(0, allpaths): None}
+    initial_entries = {PathConf(0, allpaths): None}
     backptrs = [initial_entries]
 
     # Run DP
@@ -164,7 +163,7 @@ def recover_paths(instance, weights, silent=True):
     full_paths = [deque() for _ in weights]
     try:
         # the "end" of the DP is all paths passing through the sink
-        conf = PathConf.init(n-1, allpaths)
+        conf = PathConf(n-1, allpaths)
         # iterate over the backpointer list in reverse
         for table in reversed(backptrs):
             # for v, incidence in conf:

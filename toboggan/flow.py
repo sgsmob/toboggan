@@ -483,14 +483,11 @@ class SolvedConstr:
 
 class PathConf:
     """Class representing paths ending in a set of vertices."""
-    def __init__(self):
+    
+    def __init__(self, vertex=None, paths=None):
         self.paths = {}
-
-    @staticmethod
-    def init(vertex, paths):
-        res = PathConf()
-        res.paths[vertex] = frozenset(paths)
-        return res
+        if vertex is not None:
+            self.paths[vertex] = frozenset(paths)
 
     def copy(self):
         res = PathConf()
