@@ -65,9 +65,9 @@ class Instance:
         min_max_weight = 1
         for out in self.dpgraph:
             degree = len(out)
+            if self.k < degree:
+                continue  # Instance is infeasible, will be caught later
             for _, w in out:
-                if self.k-degree+1 <= 0:
-                    continue  # Instance is infeasible, will be caught later
                 min_max_weight = max(min_max_weight, w // (self.k-degree+1))
 
         # Compute heaviest possible path in graph
@@ -483,7 +483,7 @@ class SolvedConstr:
 
 class PathConf:
     """Class representing paths ending in a set of vertices."""
-    
+
     def __init__(self, vertex=None, paths=None):
         self.paths = {}
         if vertex is not None:
