@@ -63,14 +63,15 @@ class Instance:
     def _compute_max_weight_bounds(self):
         # Get lower bound for highest weight
         min_max_weight = 1
-        for out in self.dpgraph:
-            degree = len(out)
-            if self.k < degree:
-                continue  # Instance is infeasible, will be caught later
-            for _, w in out:
-                min_max_weight = max(min_max_weight, w // (self.k-degree+1))
+        # This checks each topological cut
+        for topol_cut in self.edge_cuts:
+            cut_size = len(topol_cut)
+            for _, w in topol_cut:
+                # use pigeonhole principle to lowerbound max weight
+                min_max_weight = max(min_max_weight, w // (self.k-cut_size+1))
 
         # Compute heaviest possible path in graph
+        # by iterating over each node's out-neighborhood
         maxpath = [0 for _ in range(self.n)]
         maxpath[0] = self.flow
         for v, out in enumerate(self.dpgraph):
@@ -82,18 +83,23 @@ class Instance:
     def _compute_weight_bounds(self):
         supseq = []
         summed = 0
+        # supseq is a list of "super-increasing" values taken from edge weights
+        # starting from smallest weight in the graph. These values are upper
+        # bounds on the different path weights.
         for w in self.weights:
             if w > self.max_weight_bounds[1]:
                 break
             if w > summed:
                 supseq.append(w)
                 summed += w
+        # pad the rest of supseq with the max_weight_bound
         while len(supseq) < self.k:  # Sentinel elements
             supseq.append(self.max_weight_bounds[1])
 
         bounds = [(1, w) for w in supseq[:self.k]]
         bounds[-1] = self.max_weight_bounds
 
+        # Next, compute lowerbounds for the path weights.
         uppersum = [u for _, u in bounds]
         for i in reversed(range(self.k-1)):
             uppersum[i] += uppersum[i+1]
