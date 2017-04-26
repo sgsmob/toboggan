@@ -153,8 +153,9 @@ class Instance:
         lower_bound = max_edge_cut
 
         # Now check all pairs of cutsets "large enough" for better bound
-        sorted_cut_sizes = sorted([(cut_size, which_cut) for which_cut, cut_size
-                                  in enumerate(edge_cut_sizes)], reverse=True)
+        sorted_cut_sizes = sorted([(cut_size, which_cut) for which_cut,
+                                   cut_size in enumerate(edge_cut_sizes)],
+                                  reverse=True)
         cutsets_for_best_bound = []
         # Starting with largest, iterate over cutsets
         for idx1 in range(len(sorted_cut_sizes)):
@@ -172,15 +173,14 @@ class Instance:
                 # Now compute actual bound for this pair of cutsets;
                 # Get weights for each cutset as a multiset,
                 # compute size of (larger) difference
-                weights1 = set([w for _, w in self.dpgraph[which_cut1]])
-                weights2 = set([w for _, w in self.dpgraph[which_cut2]])
+                weights1 = set([w for _, w in self.edge_cuts[which_cut1]])
+                weights2 = set([w for _, w in self.edge_cuts[which_cut2]])
                 multiset_diff = self._larger_multiset_diff(weights1, weights2)
                 bound = math.ceil(multiset_diff/2) + min(current_size1,
                                                          current_size2)
                 # Check if we need to update bound
                 if bound > lower_bound:
                     lower_bound = bound
-                    cutsets_for_best_bound = [which_cut1, which_cut2]
         # let the user know their guess was bad if it was
         print("#\tGraph has an edge cut of size {}.\n"
               "#\tInvestigating cutsets yields bound {}.\n"
@@ -188,7 +188,7 @@ class Instance:
               "#\tContinuing using k = {}"
               "".format(max_edge_cut, lower_bound, k, lower_bound))
         if k is not None and lower_bound > k:
-            return lower_bound, cutsets_for_best_bound
+            return lower_bound
         elif k is None:
             return lower_bound
         else:
