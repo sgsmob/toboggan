@@ -306,7 +306,7 @@ def compute_cuts(dpgraph):
     return cuts
 
 
-def compute_edge_cuts(dpgraph):
+def compute_edge_cuts(graph, ordering):
     """Compute the topological edge cuts."""
     # Contains endpoints and weights for arcs in each topological cut
     top_cuts = []
@@ -315,8 +315,8 @@ def compute_edge_cuts(dpgraph):
     current_bin = defaultdict(list)
 
     # iterate over nodes in top ordering
-    for v in range(len(dpgraph)):
-        v_neighborhood = dpgraph[v]
+    for v in ordering:
+        v_neighborhood = graph.neighborhood(v)
         # remove from iterative cut-set the arcs ending at current node
         current_bin[v] = []
         for u, w in v_neighborhood:

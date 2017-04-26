@@ -32,7 +32,7 @@ class Instance:
         self.ordering = convert_to_top_sorting(graph)
         self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
         self.cuts = compute_cuts(self.dpgraph)
-        self.edge_cuts = compute_edge_cuts(self.dpgraph)
+        self.edge_cuts = compute_edge_cuts(self.graph, self.ordering)
         self.n = len(self.dpgraph)
         self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
 
@@ -553,7 +553,10 @@ class PathConf:
             # There are fewer paths ending in v than out-arcs.
             # This cannot be extended to a solution.
             return
-
+        if len(self.paths[v]) == 0:
+            raise ValueError("{} has no paths running through it.".format(v))
+        if len(edges) == 0:
+            raise ValueError("{} has no edges exiting it".format(v))
         for dist in distribute(self.paths[v], edges):
             res = self.copy()
             del res.paths[v]  # Copy old paths, remove paths ending in v
