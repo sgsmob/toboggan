@@ -18,63 +18,63 @@ class AdjList:
         self.vertices = set()
         self.adj_list = defaultdict(list)
         self.inverse_adj_list = defaultdict(list)
-
-    def create_arc_labelling(self):
-        self.out_arcs = defaultdict(list)
-        self.in_arcs = defaultdict(list)
+        self.out_arcs_lists = defaultdict(list)
+        self.in_arcs_lists = defaultdict(list)
         self.arc_info = defaultdict(list)
-        arc_label = 0
-        # Iterate over every arc exactly one time, then
-        # label arc, place it in head's out-neighb, in tail's in-neighb.
-        for node in self.vertices:
-            node_out_neighb = self.neighborhood(node)
-            self.out_arcs[node] = []
-            for out_neighb, weight in node_out_neighb:
-                self.arc_info[arc_label] = {
-                                            'start': node,
-                                            'destin': out_neighb,
-                                            'weight': weight
-                }
-                self.out_arcs[node].append(arc_label)
-                self.in_arcs[out_neighb].append(arc_label)
-                arc_label += 1
+        self.max_arc_label = 0
 
-    def subgraph(self, vertices):
-        res = AdjList(self.graph_file, self.graph_number, self.name,
-                      len(vertices))
-        for x in vertices:
-            for y, f in self.out_neighborhood(x):
-                if y in vertices:
-                    res.add_edge(x, y, f)
-        return res
+    # def subgraph(self, vertices):
+    #     res = AdjList(self.graph_file, self.graph_number, self.name,
+    #                   len(vertices))
+    #     for x in vertices:
+    #         for y, f in self.out_neighborhood(x):
+    #             if y in vertices:
+    #                 res.add_edge(x, y, f)
+    #     return res
 
-    def append(self, other):
-        """Identify sink of this graph with source of the next graph."""
-        sink = self.sink()
-        other_source = other.source()
-
-        # Make sure vertex ids are disjoint
-        vertices = set(list(iter(self)))
-        index = max(vertices) + 1
-        remap = {}
-        for v in other:
-            if v in vertices:
-                remap[v] = index
-                index += 1
-            else:
-                remap[v] = v
-
-        # Identify source of other graph with this one's sink
-        remap[other_source] = sink
-
-        for u, w, f in other.edges():
-            self.add_edge(remap[u], remap[w], f)
+    # def append(self, other):
+    #     """Identify sink of this graph with source of the next graph."""
+    #     sink = self.sink()
+    #     other_source = other.source()
+    #
+    #     # Make sure vertex ids are disjoint
+    #     vertices = set(list(iter(self)))
+    #     index = max(vertices) + 1
+    #     remap = {}
+    #     for v in other:
+    #         if v in vertices:
+    #             remap[v] = index
+    #             index += 1
+    #         else:
+    #             remap[v] = v
+    #
+    #     # Identify source of other graph with this one's sink
+    #     remap[other_source] = sink
+    #
+    #     for u, w, f in other.edges():
+    #         self.add_edge(remap[u], remap[w], f)
 
     def add_edge(self, u, v, flow):
         self.vertices.add(u)
         self.vertices.add(v)
         self.adj_list[u].append((v, flow))
         self.inverse_adj_list[v].append((u, flow))
+
+        this_label = self.max_arc_label
+        self.arc_info[this_label] = {
+                                    'start': u,
+                                    'destin': v,
+                                    'weight': flow
+        }
+        self.out_arcs_lists[u].append(this_label)
+        self.in_arcs_lists[v].append(this_label)
+        self.max_arc_label += 1
+
+    def out_arcs(self, node):
+        return self.out_arcs_lists[node]
+
+    def in_arcs(self, node):
+        return self.in_arcs_lists[node]
 
     def __len__(self):
         return len(self.vertices)

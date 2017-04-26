@@ -172,7 +172,6 @@ if __name__ == "__main__":
         if instances and index not in instances:
             continue
         start = time.time()
-        labeled_graph = graph.create_arc_labelling()
         reduced = graph.contracted()
 
         n = len(reduced)
