@@ -14,7 +14,6 @@ import signal
 from os import path
 from toboggan.guess_weight import solve
 from toboggan.parser import read_instances_verbose
-from toboggan.graphs import cut_reconf
 from toboggan.flow import Instance
 from toboggan.dp import recover_paths
 
@@ -190,8 +189,7 @@ if __name__ == "__main__":
         print("{} {}:{} with n = {}, m = {}, and truth = {}: ".format(
             index, graphname, graphnumber, n, m, k if k else "?"), flush=True)
 
-        # Reduce and reconfigure graph
-        reduced = cut_reconf(reduced)
+        # create an instance of the graph
         instance = Instance(reduced, k)
 
         # find the optimal solution size
