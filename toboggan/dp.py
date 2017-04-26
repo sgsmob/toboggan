@@ -21,12 +21,8 @@ def solve(instance, silent=True, guessed_weights=None):
     solution exists with each None replaced by a integer that respects the
     sorted order of the tuple.
     """
-    dpgraph = instance.dpgraph
+    graph = instance.graph
     k = instance.k
-    n = instance.n
-
-    if not silent:
-        print(dpgraph)
 
     # The only constraint a priori is the total flow value
     globalconstr = Constr(instance)
@@ -42,21 +38,16 @@ def solve(instance, silent=True, guessed_weights=None):
     old_table = defaultdict(set)
     allpaths = frozenset(range(k))
     # All k paths `end' at source
-    old_table[PathConf(0, allpaths)] = set([globalconstr])
+    old_table[PathConf(graph.source(), allpaths)] = set([globalconstr])
 
     # Run DP
-    for i in range(n-1):
-        if not silent:
-            print("")
-            print("Active ({}): {}".format(i, instance.cuts[i]))
-            print("Removing {} from active set".format(i))
-
+    for v in instance.ordering[:-1]:
         new_table = defaultdict(set)
         for paths, constraints in old_table.items():
             # Distribute paths incoming to i onto its neighbours
             if not silent:
                 print("  Pushing {}".format(paths))
-            for newpaths, dist in paths.push(i, dpgraph[i]):
+            for newpaths, dist in paths.push(v, graph.out_neighborhood(v)):
                 # if not silent:
                     # print("  Candidate paths", newpaths)
                 debug_counter = 0
@@ -100,18 +91,17 @@ def solve(instance, silent=True, guessed_weights=None):
         print("\nDone.")
         print(new_table)
 
-    candidates = new_table[PathConf(n-1, allpaths)]
+    candidates = new_table[PathConf(graph.sink(), allpaths)]
     return candidates
 
 
 def recover_paths(instance, weights, silent=True):
     """Recover the paths that correspond to the weights given."""
-    dpgraph = instance.dpgraph
+    graph = instance.graph
     k = instance.k
-    n = instance.n
 
     if not silent:
-        print(dpgraph)
+        print(graph)
 
     # since we know all the weights, we can stored them as a solved constraint
     # system
@@ -123,22 +113,17 @@ def recover_paths(instance, weights, silent=True):
     # Build DP table, which will map path configurations to the path
     # configurations in the previous tables that yielded the specific entry
     # All k paths start at the source vertex
-    initial_entries = {PathConf(0, allpaths): None}
+    initial_entries = {PathConf(graph.source(), allpaths): None}
     backptrs = [initial_entries]
 
     # Run DP
-    for i in range(n-1):
-        if not silent:
-            print("")
-            print("Active ({}): {}".format(i, instance.cuts[i]))
-            print("Removing {} from active set".format(i))
-
+    for v in instance.ordering[:-1]:
         entries = {}
         for old_paths in backptrs[-1].keys():
             # Distribute paths incoming to i onto its neighbors
             if not silent:
                 print("  Pushing {}".format(old_paths))
-            for new_paths, dist in old_paths.push(i, dpgraph[i]):
+            for new_paths, dist in old_paths.push(v, graph.neighborhood(v)):
                 # make sure the sets of paths that were pushed along each
                 # edge sum to the proper flow value.  If not, don't create a
                 # new table entry for this path set.
@@ -163,17 +148,15 @@ def recover_paths(instance, weights, silent=True):
     full_paths = [deque() for _ in weights]
     try:
         # the "end" of the DP is all paths passing through the sink
-        conf = PathConf(n-1, allpaths)
+        conf = PathConf(graph.sink(), allpaths)
         # iterate over the backpointer list in reverse
         for table in reversed(backptrs):
             # for v, incidence in conf:
             # CHANGE BECAUSE PathConf iteration doesn't return .items()
             # print(table[conf])
-            for i in conf:
-                # translate into vertex from the original graph
-                v = instance.ordering[i]
+            for v in conf:
                 # get the paths crossing this vertex
-                incidence = conf[i]
+                incidence = conf[v]
                 # vertices might repeat in consecutive table entries if an edge
                 # is "long" wrt the topological ordering.  Don't add it twice
                 # to the path lists in this case.

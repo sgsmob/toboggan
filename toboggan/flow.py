@@ -6,14 +6,13 @@
 # python libs
 import math
 from collections import defaultdict
-from operator import itemgetter
 import itertools
 import numpy as np
 from scipy.optimize import linprog
 
 # local imports
 from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
-                            compute_edge_cuts, top_sorting_graph_representation
+                            compute_edge_cuts
 from toboggan.partition import algorithm_u
 
 
@@ -30,12 +29,10 @@ class Instance:
         # information about the graph and its ordering
         self.graph = graph
         self.ordering = convert_to_top_sorting(graph)
-        self.dpgraph = top_sorting_graph_representation(graph, self.ordering)
-        self.cuts = compute_cuts(self.dpgraph)
-        self.edge_cuts = compute_edge_cuts(self.dpgraph)
-        self.n = len(self.dpgraph)
-        self.flow = sum(map(itemgetter(1), self.dpgraph[0]))
-
+        self.cuts = compute_cuts(self.graph, self.ordering)
+        self.edge_cuts = compute_edge_cuts(self.graph, self.ordering)
+        self.flow = sum(w for _, w in self.graph.neighborhood(
+                                            self.graph.source()))
         # get a lower bound on the number of paths needed
         # We pass the input k to this function so it can inform the user if
         # the input k can be easily identified as too small.
@@ -72,13 +69,14 @@ class Instance:
 
         # Compute heaviest possible path in graph
         # by iterating over each node's out-neighborhood
-        maxpath = [0 for _ in range(self.n)]
-        maxpath[0] = self.flow
-        for v, out in enumerate(self.dpgraph):
+        maxpath = {v: 0 for v in self.graph}
+        maxpath[self.graph.source()] = self.flow
+        for v in self.ordering:
+            out = self.graph.neighborhood(v)
             for u, w in out:
                 maxpath[u] = max(maxpath[u], min(w, maxpath[v]))
 
-        return (min_max_weight, maxpath[-1])
+        return (min_max_weight, maxpath[self.graph.sink()])
 
     def _compute_weight_bounds(self):
         supseq = []
@@ -553,7 +551,10 @@ class PathConf:
             # There are fewer paths ending in v than out-arcs.
             # This cannot be extended to a solution.
             return
-
+        if len(self.paths[v]) == 0:
+            raise ValueError("{} has no paths running through it.".format(v))
+        if len(edges) == 0:
+            raise ValueError("{} has no edges exiting it".format(v))
         for dist in distribute(self.paths[v], edges):
             res = self.copy()
             del res.paths[v]  # Copy old paths, remove paths ending in v
