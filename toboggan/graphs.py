@@ -19,6 +19,26 @@ class AdjList:
         self.adj_list = defaultdict(list)
         self.inverse_adj_list = defaultdict(list)
 
+    def create_arc_labelling(self):
+        self.out_arcs = defaultdict(list)
+        self.in_arcs = defaultdict(list)
+        self.arc_info = defaultdict(list)
+        arc_label = 0
+        # Iterate over every arc exactly one time, then
+        # label arc, place it in head's out-neighb, in tail's in-neighb.
+        for node in self.vertices:
+            node_out_neighb = self.neighborhood(node)
+            self.out_arcs[node] = []
+            for out_neighb, weight in node_out_neighb:
+                self.arc_info[arc_label] = {
+                                            'start': node,
+                                            'destin': out_neighb,
+                                            'weight': weight
+                }
+                self.out_arcs[node].append(arc_label)
+                self.in_arcs[out_neighb].append(arc_label)
+                arc_label += 1
+
     def subgraph(self, vertices):
         res = AdjList(self.graph_file, self.graph_number, self.name,
                       len(vertices))
