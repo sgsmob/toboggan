@@ -131,55 +131,49 @@ class AdjList:
         1 or v has in degree 1 are contracted.
         """
         res = self.copy()
+        arc_mapping = {e: [e] for e in res.arcs()}
         # contract out degree 1 vertices
         for u in list(res):
             if res.out_degree(u) == 1:
-                v = res.out_neighborhood(u)[0][0]
-                # print("{} has out degree 1 to {}".format(u,v))
-                res.contract_edge(u, v, keep_source=False)
+                arc = res.out_arcs(u)[0]
+                # mark u's inarcs to know they use the arc to be contracted
+                for a in res.in_arcs(u):
+                    arc_mapping[a].extend(arc_mapping[arc])
+                # contract the edge
+                res.contract_edge(a, keep_source=False)
         # contract in degree 1 vertices
         for v in list(res):
             if res.in_degree(v) == 1:
-                u = res.in_neighborhood(v)[0][0]
+                arc = res.in_arcs(v)[0]
+                # mark v's outarcs to know they use the arc to be contracted
+                for a in res.out_arcs(v):
+                    new_path = list(arc_mapping[arc])
+                    arc_mapping[a] = new_path.extend(arc_mapping[a])
                 # print("{} has in degree 1 from {}".format(v,u))
-                res.contract_edge(u, v, keep_source=True)
-        return res
+                res.contract_edge(a, keep_source=True)
+        return res, arc_mapping
 
-    def contract_edge(self, u, v, keep_source=True):
+    def contract_edge(self, e, keep_source=True):
         """
-        Contract the arc from u to v.
+        Contract the arc e.
 
         If keep_source is true, the resulting vertex retains the label of the
         source, otherwise it keeps the sink's
         """
-        # print("Edges:")
-        # for e in sorted(self.edges()):
-        #    print(e)
-        # print("Inverse Edges:")
-        # for e in sorted(self.reverse_edges()):
-        #    print(e)
-        # delete the arc u v
-        # find where v is in the adjacency list
-        for i, edge in enumerate(self.out_neighborhood(u)):
-            w, f = edge
-            if w == v:
-                break
-        else:
-            raise ValueError("{} not an out neighbor of {}".format(v, u))
-        # find where u is in the inverse adjacency list
-        for j, edge in enumerate(self.in_neighborhood(v)):
-            w, f = edge
-            if w == u:
-                break
-        else:
-            raise ValueError("{} not an in neighbor of {}".format(u, v))
+        u, v, w = self.arc_info[e]
+        i = self.out_arcs[u].find(e)
+        j = self.in_arcs[v].find(e)
         # move last neighbor into position of uv arc and delete arc
         self.adj_list[u][i] = self.adj_list[u][-1]
         self.adj_list[u] = self.adj_list[u][:-1]
+        self.out_arcs[u][i] = self.out_arcs[u][-1]
+        self.out_arcs[u] = self.out_arc[u][:-1]
 
         # move last neighbor into position of uv arc and delete arc
         self.inverse_adj_list[v][j] = self.inverse_adj_list[v][-1]
         self.inverse_adj_list[v] = self.inverse_adj_list[v][:-1]
+        self.in_arcs[u][i] = self.in_arcs[u][-1]
+        self.in_arcs[u] = self.in_arcs[u][:-1]
 
         # to keep things concise, use the label a for the vertex to keep
         # and label b for the vertex to discard
@@ -187,16 +181,22 @@ class AdjList:
 
         # update out-neighbors of a
         self.adj_list[a].extend(self.out_neighborhood(b))
+        self.out_arcs[a].extend(self.out_arcs[b])
         # make out-neighbors of b point back to a
-        for w, f in self.out_neighborhood(b):
+        for lab, edge in zip(self.out_arcs[b], self.out_neighborhood(b)):
+            w, f = edge
             i = self.inverse_adj_list[w].index((b, f))
+            self.arc_list[lab] = (a, w, f)
             self.inverse_adj_list[w][i] = (a, f)
 
         # update in-neighbors of a
         self.inverse_adj_list[a].extend(self.in_neighborhood(b))
+        self.in_arcs[a].extend(self.in_arcs[b])
         # make in neighbors of b point to a
-        for w, f in self.in_neighborhood(b):
+        for lab, edge in self.in_neighborhood(b):
+            w, f = edge
             i = self.adj_list[w].index((b, f))
+            self.arc_list[lab] = (w, a, f)
             self.adj_list[w][i] = (a, f)
 
         if b in self.adj_list:
@@ -204,6 +204,7 @@ class AdjList:
         if b in self.inverse_adj_list:
             del self.inverse_adj_list[b]
         self.vertices.remove(b)
+        del self.arcs_info[e]
 
     def reversed(self):
         res = AdjList(self.graph_file, self.graph_number, self.name,
