@@ -77,6 +77,8 @@ def find_opt_size(instance, maxtime):
     """Find the optimum size of a flow decomposition."""
     if maxtime is None:
         maxtime = -1
+    print("Searching for minimum-sized set of weights, timeout set at {}"
+          "".format(maxtime))
     try:
         with timeout(seconds=maxtime):
             while True:

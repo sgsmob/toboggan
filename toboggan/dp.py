@@ -78,7 +78,7 @@ def solve(instance, silent=True, guessed_weights=None):
 
                     if newconstr is None:
                         pass  # Infeasible constraints
-                    elif newconstr.is_redundant(newpaths):
+                    elif newconstr.is_redundant():
                         if not silent:
                             print(".", end="")
                             debug_counter += 1

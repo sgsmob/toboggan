@@ -257,7 +257,7 @@ class Constr:
     def __repr__(self):
         return str(self.A)
 
-    def is_redundant(self, paths):
+    def is_redundant(self):
         # We can reduce the number of redundant solutions by imposing that
         # the already known path-weights are sorted.
         weights = [w for w in self.known_values if w is not None]
@@ -437,7 +437,7 @@ class SolvedConstr:
     def __repr__(self):
         return "SolvedConstr " + str(self.path_weights)
 
-    def is_redundant(self, pathconf):
+    def is_redundant(self):
         # We can reduce the number of redundant solutions by imposing that
         # the path-weights are sorted.
         if not all(self.path_weights[i] <= self.path_weights[i+1]
