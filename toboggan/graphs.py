@@ -76,6 +76,9 @@ class AdjList:
     def in_arcs(self, node):
         return self.in_arcs_lists[node]
 
+    def arcs(self):
+        return self.arc_info.items()
+
     def __len__(self):
         return len(self.vertices)
 
@@ -123,6 +126,9 @@ class AdjList:
                       len(self))
         res.adj_list = copy.deepcopy(self.adj_list)
         res.inverse_adj_list = copy.deepcopy(self.inverse_adj_list)
+        res.out_arcs_lists = copy.deepcopy(self.out_arcs_lists)
+        res.in_arcs_lists = copy.deepcopy(self.in_arcs_lists)
+        res.arc_info = copy.deepcopy(self.arc_info)
         res.vertices = set(self.vertices)
         return res
 
@@ -151,16 +157,17 @@ class AdjList:
         1 or v has in degree 1 are contracted.
         """
         res = self.copy()
-        arc_mapping = {e: [e] for e in res.arcs()}
+        arc_mapping = {e: [e] for e, _ in res.arcs()}
         # contract out degree 1 vertices
         for u in list(res):
             if res.out_degree(u) == 1:
+                print(u, res.out_arcs(u))
                 arc = res.out_arcs(u)[0]
                 # mark u's inarcs to know they use the arc to be contracted
                 for a in res.in_arcs(u):
                     arc_mapping[a].extend(arc_mapping[arc])
                 # contract the edge
-                res.contract_edge(a, keep_source=False)
+                res.contract_edge(arc, keep_source=False)
         # contract in degree 1 vertices
         for v in list(res):
             if res.in_degree(v) == 1:
@@ -170,7 +177,7 @@ class AdjList:
                     new_path = list(arc_mapping[arc])
                     arc_mapping[a] = new_path.extend(arc_mapping[a])
                 # print("{} has in degree 1 from {}".format(v,u))
-                res.contract_edge(a, keep_source=True)
+                res.contract_edge(arc, keep_source=True)
         return res, arc_mapping
 
     def contract_edge(self, e, keep_source=True):
@@ -180,20 +187,23 @@ class AdjList:
         If keep_source is true, the resulting vertex retains the label of the
         source, otherwise it keeps the sink's
         """
-        u, v, w = self.arc_info[e]
-        i = self.out_arcs[u].find(e)
-        j = self.in_arcs[v].find(e)
+        u = self.arc_info[e]["start"]
+        v = self.arc_info[e]["destin"]
+        w = self.arc_info[e]["weight"]
+
+        i = self.out_arcs(u).index(e)
+        j = self.in_arcs(v).index(e)
         # move last neighbor into position of uv arc and delete arc
         self.adj_list[u][i] = self.adj_list[u][-1]
         self.adj_list[u] = self.adj_list[u][:-1]
-        self.out_arcs[u][i] = self.out_arcs[u][-1]
-        self.out_arcs[u] = self.out_arc[u][:-1]
+        self.out_arcs_lists[u][i] = self.out_arcs_lists[u][-1]
+        self.out_arcs_lists[u] = self.out_arcs_lists[u][:-1]
 
         # move last neighbor into position of uv arc and delete arc
         self.inverse_adj_list[v][j] = self.inverse_adj_list[v][-1]
         self.inverse_adj_list[v] = self.inverse_adj_list[v][:-1]
-        self.in_arcs[u][i] = self.in_arcs[u][-1]
-        self.in_arcs[u] = self.in_arcs[u][:-1]
+        self.in_arcs_lists[v][j] = self.in_arcs_lists[v][-1]
+        self.in_arcs_lists[v] = self.in_arcs_lists[v][:-1]
 
         # to keep things concise, use the label a for the vertex to keep
         # and label b for the vertex to discard
@@ -201,22 +211,22 @@ class AdjList:
 
         # update out-neighbors of a
         self.adj_list[a].extend(self.out_neighborhood(b))
-        self.out_arcs[a].extend(self.out_arcs[b])
+        self.out_arcs_lists[a].extend(self.out_arcs_lists[b])
         # make out-neighbors of b point back to a
-        for lab, edge in zip(self.out_arcs[b], self.out_neighborhood(b)):
+        for lab, edge in zip(self.out_arcs(b), self.out_neighborhood(b)):
             w, f = edge
             i = self.inverse_adj_list[w].index((b, f))
-            self.arc_list[lab] = (a, w, f)
+            self.arc_info[lab]["start"] = a
             self.inverse_adj_list[w][i] = (a, f)
 
         # update in-neighbors of a
         self.inverse_adj_list[a].extend(self.in_neighborhood(b))
-        self.in_arcs[a].extend(self.in_arcs[b])
+        self.in_arcs_lists[a].extend(self.in_arcs_lists[b])
         # make in neighbors of b point to a
-        for lab, edge in self.in_neighborhood(b):
+        for lab, edge in zip(self.in_arcs(b), self.in_neighborhood(b)):
             w, f = edge
             i = self.adj_list[w].index((b, f))
-            self.arc_list[lab] = (w, a, f)
+            self.arc_info[lab]["destin"] = a
             self.adj_list[w][i] = (a, f)
 
         if b in self.adj_list:
@@ -224,7 +234,7 @@ class AdjList:
         if b in self.inverse_adj_list:
             del self.inverse_adj_list[b]
         self.vertices.remove(b)
-        del self.arcs_info[e]
+        del self.arc_info[e]
 
     def reversed(self):
         res = AdjList(self.graph_file, self.graph_number, self.name,

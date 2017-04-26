@@ -172,7 +172,7 @@ if __name__ == "__main__":
         if instances and index not in instances:
             continue
         start = time.time()
-        reduced = graph.contracted()
+        reduced, mapping = graph.contracted()
 
         n = len(reduced)
         m = len(list(reduced.edges()))
