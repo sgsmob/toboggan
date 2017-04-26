@@ -292,16 +292,16 @@ def top_sorting_graph_representation(graph, ordering):
     return res
 
 
-def compute_cuts(dpgraph):
-    n = len(dpgraph)
-    cuts = [None] * (n)
-    cuts[0] = set([0])
+def compute_cuts(graph, ordering):
+    """Compute the topological vertex cuts."""
+    cuts = [None for v in graph]
+    cuts[0] = set([graph.source()])
 
-    for i in range(n-1):
+    for i, v in enumerate(ordering[:-1]):
         # Remove i from active set, add neighbors
         cuts[i+1] = set(cuts[i])
-        cuts[i+1].remove(i)
-        for t, w in dpgraph[i]:
+        cuts[i+1].remove(v)
+        for t, w in graph.out_neighborhood(v):
             cuts[i+1].add(t)
     return cuts
 

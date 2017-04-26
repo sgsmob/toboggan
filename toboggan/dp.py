@@ -21,7 +21,6 @@ def solve(instance, silent=True, guessed_weights=None):
     solution exists with each None replaced by a integer that respects the
     sorted order of the tuple.
     """
-    # dpgraph = instance.dpgraph
     graph = instance.graph
     k = instance.k
 
@@ -42,12 +41,7 @@ def solve(instance, silent=True, guessed_weights=None):
     old_table[PathConf(graph.source(), allpaths)] = set([globalconstr])
 
     # Run DP
-    for i, v in enumerate(instance.ordering[:-1]):
-        if not silent:
-            print("")
-            print("Active ({}): {}".format(i, instance.cuts[i]))
-            print("Removing {} from active set".format(i))
-
+    for v in instance.ordering[:-1]:
         new_table = defaultdict(set)
         for paths, constraints in old_table.items():
             # Distribute paths incoming to i onto its neighbours
@@ -105,10 +99,9 @@ def recover_paths(instance, weights, silent=True):
     """Recover the paths that correspond to the weights given."""
     graph = instance.graph
     k = instance.k
-    n = instance.n
 
     if not silent:
-        print(dpgraph)
+        print(graph)
 
     # since we know all the weights, we can stored them as a solved constraint
     # system
@@ -124,12 +117,7 @@ def recover_paths(instance, weights, silent=True):
     backptrs = [initial_entries]
 
     # Run DP
-    for i, v in enumerate(instance.ordering[:-1]):
-        if not silent:
-            print("")
-            print("Active ({}): {}".format(i, instance.cuts[i]))
-            print("Removing {} from active set".format(i))
-
+    for v in instance.ordering[:-1]:
         entries = {}
         for old_paths in backptrs[-1].keys():
             # Distribute paths incoming to i onto its neighbors
@@ -167,8 +155,6 @@ def recover_paths(instance, weights, silent=True):
             # CHANGE BECAUSE PathConf iteration doesn't return .items()
             # print(table[conf])
             for v in conf:
-                # translate into vertex from the original graph
-                #v = instance.ordering[i]
                 # get the paths crossing this vertex
                 incidence = conf[v]
                 # vertices might repeat in consecutive table entries if an edge
