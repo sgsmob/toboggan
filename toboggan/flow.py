@@ -113,7 +113,7 @@ class Instance:
             bounds[i] = (lower, bounds[i][1])
         return np.array(bounds)
 
-    def _larger_multiset_diff(list1, list2):
+    def _larger_multiset_diff(self, list1, list2):
         """
         Treat twolists as multisets, return list1-list2.
         Note: input lists should contain int or float type.
@@ -153,8 +153,8 @@ class Instance:
         lower_bound = max_edge_cut
 
         # Now check all pairs of cutsets "large enough" for better bound
-        sorted_cut_sizes = sorted((cut_size, which_cut) for which_cut, cut_size
-                                  in enumerate(edge_cut_sizes))
+        sorted_cut_sizes = sorted([(cut_size, which_cut) for which_cut, cut_size
+                                  in enumerate(edge_cut_sizes)], reverse=True)
         cutsets_for_best_bound = []
         # Starting with largest, iterate over cutsets
         for idx1 in range(len(sorted_cut_sizes)):
@@ -178,15 +178,16 @@ class Instance:
                 bound = math.ceil(multiset_diff/2) + min(current_size1,
                                                          current_size2)
                 # Check if we need to update bound
-                if bound < lower_bound:
+                if bound > lower_bound:
                     lower_bound = bound
                     cutsets_for_best_bound = [which_cut1, which_cut2]
         # let the user know their guess was bad if it was
+        print("#\tGraph has an edge cut of size {}.\n"
+              "#\tInvestigating cutsets yields bound {}.\n"
+              "#\tUser supplied k value of {}.\n"
+              "#\tContinuing using k = {}"
+              "".format(max_edge_cut, lower_bound, k, lower_bound))
         if k is not None and lower_bound > k:
-            print("Graph has an edge cut of size {}. "
-                  "Further investigating cutsets yields best bound is {}. "
-                  "User supplied k value of {}. Continuing using k = {}"
-                  "".format(max_edge_cut, lower_bound, k, lower_bound))
             return lower_bound, cutsets_for_best_bound
         elif k is None:
             return lower_bound

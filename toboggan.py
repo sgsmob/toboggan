@@ -205,6 +205,7 @@ if __name__ == "__main__":
                                                                 weights))
             paths = recover_paths(instance, weights)
             elapsed_path_time = time.time() - start_path_time
-            print("Path computation took {:.2f} seconds".format(elapsed_path_time))
+            print("Path computation took{: .2f} "
+                  "seconds".format(elapsed_path_time))
             print(paths)
         print()
