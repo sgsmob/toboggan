@@ -131,11 +131,10 @@ def recover_paths(instance, weights, silent=True):
                 for arc, pathset in dist:  # Paths pathset coincide on arc
                     success = globalconstr.add_constraint(pathset, arc)
                     if success is None:
-                        # print("Failure {}".format(new_paths))
                         break
                 else:
-                    # print("Success {}".format(new_paths))
-                    entries[new_paths] = old_paths
+                    if new_paths not in entries:
+                        entries[new_paths] = old_paths
 
         # add the new entries to the list of backpointers
         backptrs.append(entries)
@@ -153,7 +152,6 @@ def recover_paths(instance, weights, silent=True):
         conf = list(backptrs[-1].keys())[0]
         # iterate over the backpointer list in reverse
         for table in reversed(backptrs):
-            # print(table[conf])
             for v in conf:
                 # get the paths crossing this vertex
                 incidence = conf[v]
@@ -164,10 +162,6 @@ def recover_paths(instance, weights, silent=True):
                     arc_used = conf.arcs_used[p]
                     if arc_used == -1:
                         break
-                    # print("path {}, path weight {}; arc {}, flow {}"
-                    #       "".format(p, weights[p], arc_used,
-                    #                 graph.arc_info[arc_used]['weight']))
-                    # if len(full_paths[p]) == 0 or full_paths[p][0] != v:
                     if len(full_paths[p][0]) == 0 or \
                             full_paths[p][0][0] != arc_used:
                         full_paths[p][0].appendleft(arc_used)

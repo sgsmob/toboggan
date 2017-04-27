@@ -155,7 +155,8 @@ class AdjList:
                 # mark v's outarcs to know they use the arc to be contracted
                 for a in res.out_arcs(v):
                     new_path = list(arc_mapping[arc])
-                    arc_mapping[a] = new_path.extend(arc_mapping[a])
+                    new_path.extend(arc_mapping[a])
+                    arc_mapping[a] = new_path
                 # print("{} has in degree 1 from {}".format(v,u))
                 res.contract_edge(arc, keep_source=True)
         return res, arc_mapping
@@ -233,44 +234,33 @@ class AdjList:
         plt.show()
 
 
-def test_solution(graph, solution):
+def test_paths(graph, pathset):
+    for path in pathset:
+        for i in range(len(path)-1):
+            start = path[i]
+            dest = path[i+1]
+            for u, _ in graph.neighborhood(start):
+                if u == dest:
+                    break
+            else:
+                raise ValueError("Solution contains path with non-sequential"
+                                 "vertices: {}, {}".format(start, dest))
+
+
+def test_flow_cover(graph, solution):
     # Decode the solution set of paths
     recovered_arc_weights = defaultdict(int)
     for path_object in solution:
         path_deq, path_weight = path_object
         for arc in path_deq:
             recovered_arc_weights[arc] += path_weight
-
+    # Check that every arc has its flow covered
     for arc, arc_val in graph.arc_info.items():
         true_flow = arc_val['weight']
         recovered_flow = recovered_arc_weights[arc]
         if (true_flow != recovered_flow):
-            print("solution incorrect; arc {} has flow {},"
+            print("SOLUTION INCORRECT; arc {} has flow {},"
                   " soln {}".format(arc, true_flow, recovered_flow))
-
-# for weight, path in solution[1]:
-#     for u, v in zip(path[:-1], path[1:]):
-#         arc_weights[(u, v)] += weight
-#         vertices.add(u)
-#         vertices.add(v)
-#
-# if set(graph) != vertices:
-#     print("Vertex sets are different:")
-#     print("  Graph has vertices", set(graph))
-#     print("  Solution has vertices", vertices)
-#     return
-# else:    #
-# arc_count = 0
-# for u, v, w in graph.edges():
-#     if arc_weights[(u, v)] != w:
-#         print("Arc ({},{}) has weight {} in the solution but {} in the"
-#               "graph.".format(u, v, arc_weights[(u, v)], w))
-#     arc_count += 1
-# if arc_count != len(arc_weights):
-#     print("Number of arcs in solution is different than number
-#           of arcs in graph.")
-# else:
-#     print("Solution and graph produce the same number of arcs.")
 
 
 def convert_to_top_sorting(graph):
@@ -292,25 +282,6 @@ def convert_to_top_sorting(graph):
     visit(source, ordering)
 
     return ordering
-
-
-def top_sorting_graph_representation(graph, ordering):
-    n = len(ordering)
-    mapping = {}
-
-    res = []
-
-    for i, v in enumerate(ordering):
-        mapping[v] = i
-
-    for i in range(n):
-        u = ordering[i]
-        neighborhood = graph.neighborhood(u)
-        dag_neighborhood = list(map(lambda pair: (mapping[pair[0]], pair[1]),
-                                neighborhood))
-        res.append(dag_neighborhood)
-
-    return res
 
 
 def compute_cuts(graph, ordering):

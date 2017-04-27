@@ -16,7 +16,7 @@ from toboggan.guess_weight import solve
 from toboggan.parser import read_instances_verbose
 from toboggan.flow import Instance
 from toboggan.dp import recover_paths
-from toboggan.graphs import test_solution
+from toboggan.graphs import test_flow_cover
 
 
 # Timeout context, see
@@ -206,8 +206,18 @@ if __name__ == "__main__":
             elapsed_path_time = time.time() - start_path_time
             print("Path computation took{: .2f} "
                   "seconds".format(elapsed_path_time))
-            print(paths)
             # Check solution:
-            test_solution(reduced, paths)
+            test_flow_cover(reduced, paths)
+
+            # Print solutions
+            for path_deq, weight in paths:
+                real_path = []
+                for arc in path_deq:
+                    real_path.extend(mapping[arc])
+                node_seq = [graph.source()]
+                for arc in real_path:
+                    node_seq.append(graph.arc_info[arc]['destin'])
+                print("\tPath with weight = {}".format(weight))
+                print("\t{}".format(node_seq))
 
         print()
