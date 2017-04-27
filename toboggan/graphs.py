@@ -23,37 +23,6 @@ class AdjList:
         self.arc_info = defaultdict(list)
         self.max_arc_label = 0
 
-    # def subgraph(self, vertices):
-    #     res = AdjList(self.graph_file, self.graph_number, self.name,
-    #                   len(vertices))
-    #     for x in vertices:
-    #         for y, f in self.out_neighborhood(x):
-    #             if y in vertices:
-    #                 res.add_edge(x, y, f)
-    #     return res
-
-    # def append(self, other):
-    #     """Identify sink of this graph with source of the next graph."""
-    #     sink = self.sink()
-    #     other_source = other.source()
-    #
-    #     # Make sure vertex ids are disjoint
-    #     vertices = set(list(iter(self)))
-    #     index = max(vertices) + 1
-    #     remap = {}
-    #     for v in other:
-    #         if v in vertices:
-    #             remap[v] = index
-    #             index += 1
-    #         else:
-    #             remap[v] = v
-    #
-    #     # Identify source of other graph with this one's sink
-    #     remap[other_source] = sink
-    #
-    #     for u, w, f in other.edges():
-    #         self.add_edge(remap[u], remap[w], f)
-
     def add_edge(self, u, v, flow):
         self.vertices.add(u)
         self.vertices.add(v)
@@ -96,6 +65,17 @@ class AdjList:
             if self.out_degree(v) == 0:
                 return v
         raise TypeError("This graph has no sink")
+
+    def labeled_neighborhood(self, u):
+        if u in self.adj_list:
+            res = []
+            for arc in self.out_arcs_lists[u]:
+                dest = self.arc_info[arc]['destin']
+                flow = self.arc_info[arc]['weight']
+                res.append([dest, flow, arc])
+            return res
+        else:
+            return []
 
     def neighborhood(self, u):
         if u in self.adj_list:
@@ -161,7 +141,7 @@ class AdjList:
         # contract out degree 1 vertices
         for u in list(res):
             if res.out_degree(u) == 1:
-                print(u, res.out_arcs(u))
+                # print(u, res.out_arcs(u))
                 arc = res.out_arcs(u)[0]
                 # mark u's inarcs to know they use the arc to be contracted
                 for a in res.in_arcs(u):

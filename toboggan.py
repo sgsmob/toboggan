@@ -178,16 +178,16 @@ if __name__ == "__main__":
         m = len(list(reduced.edges()))
 
         if len(reduced) <= 1:
-            print("{} {}:{} is trivial.\n".format(index,
-                                                  graphname,
-                                                  graphnumber))
+            print("Graph instance named {}:{} is"
+                  " trivial.\n".format(graphname, graphnumber))
             continue
 
         if args.disprove and k:
             k = k - 1
             print("# Using parameter k-1")
-        print("{} {}:{} with n = {}, m = {}, and truth = {}: ".format(
-            index, graphname, graphnumber, n, m, k if k else "?"), flush=True)
+        print("Graph instance named {}:{} with n = {}, m = {}, and truth = {}:"
+              "".format(graphname, graphnumber,
+                        n, m, k if k else "?"), flush=True)
 
         # create an instance of the graph
         instance = Instance(reduced, k)

@@ -255,7 +255,7 @@ class Constr:
     def __repr__(self):
         return str(self.A)
 
-    def is_redundant(self, paths):
+    def is_redundant(self):
         # We can reduce the number of redundant solutions by imposing that
         # the already known path-weights are sorted.
         weights = [w for w in self.known_values if w is not None]
@@ -435,7 +435,7 @@ class SolvedConstr:
     def __repr__(self):
         return "SolvedConstr " + str(self.path_weights)
 
-    def is_redundant(self, pathconf):
+    def is_redundant(self):
         # We can reduce the number of redundant solutions by imposing that
         # the path-weights are sorted.
         if not all(self.path_weights[i] <= self.path_weights[i+1]
@@ -490,21 +490,25 @@ class PathConf:
     """Class representing paths ending in a set of vertices."""
 
     def __init__(self, vertex=None, paths=None):
+        # paths is a dict mapping from vertex to set of paths crossing it
         self.paths = {}
+        # arcs_used is a dict mapping path to arc it crossed to get to vertex
+        self.arcs_used = {}
         if vertex is not None:
             self.paths[vertex] = frozenset(paths)
+            for path in paths:
+                self.arcs_used[path] = -1
 
     def copy(self):
         res = PathConf()
         for v, paths in self.paths.items():
             res.paths[v] = frozenset(paths)
+        res.arcs_used = {}
+        for key, val in self.arcs_used.items():
+            res.arcs_used[key] = val
         return res
 
     def __iter__(self):
-        # return iter(self.paths.items())
-        # THIS CHANGE POTENTIALLY DANGEROUS
-        # so intead we didn't make this change,
-        #  and altered the way dp.solve_and_recover iterates over conf
         return iter(self.paths)
 
     def __contains__(self, v):
@@ -519,7 +523,8 @@ class PathConf:
     def __repr__(self):
         res = "PathConf("
         for v in self.paths:
-            res += "{}: {}, ".format(v, list(self.paths[v]))
+            res += "{}: {}, ".format(v, list((p, self.arcs_used[p]) for p in
+                                             self.paths[v]))
         return res[:-2] + ")"
 
     def __eq__(self, other):
@@ -555,17 +560,22 @@ class PathConf:
             raise ValueError("{} has no paths running through it.".format(v))
         if len(edges) == 0:
             raise ValueError("{} has no edges exiting it".format(v))
-        for dist in distribute(self.paths[v], edges):
-            res = self.copy()
-            del res.paths[v]  # Copy old paths, remove paths ending in v
-            for e, p in dist:  # Push paths over prescribed edges
-                t, w = e
-                if t in res.paths:
-                    res.paths[t] = frozenset(res.paths[t] | set(p))
+        for path_distribution in distribute(self.paths[v], edges):
+            res = self.copy()  # Copy old paths,
+            for p in res.paths[v]:
+                del res.arcs_used[p]  # remove paths ending in v
+            del res.paths[v]
+            # Push paths over prescribed edges
+            for arc, pathset in path_distribution:
+                tail, _, arc_label = arc
+                if tail in res.paths:
+                    res.paths[tail] = frozenset(res.paths[tail] | set(pathset))
                 else:
-                    res.paths[t] = frozenset(p)
+                    res.paths[tail] = frozenset(pathset)
+                for path in pathset:
+                    res.arcs_used[path] = arc_label
 
-            yield res, dist
+            yield res, path_distribution
 
 
 def distribute(paths, edges):
