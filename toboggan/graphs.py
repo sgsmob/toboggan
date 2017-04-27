@@ -234,33 +234,43 @@ class AdjList:
 
 
 def test_solution(graph, solution):
-    arc_weights = defaultdict(int)
-    vertices = set()
-    for weight, path in solution[1]:
-        for u, v in zip(path[:-1], path[1:]):
-            arc_weights[(u, v)] += weight
-            vertices.add(u)
-            vertices.add(v)
+    # Decode the solution set of paths
+    recovered_arc_weights = defaultdict(int)
+    for path_object in solution:
+        path_deq, path_weight = path_object
+        for arc in path_deq:
+            recovered_arc_weights[arc] += path_weight
 
-    if set(graph) != vertices:
-        print("Vertex sets are different:")
-        print("  Graph has vertices", set(graph))
-        print("  Solution has vertices", vertices)
-        return
-    else:
-        print("Graph and solution have same vertex set.")
+    for arc, arc_val in graph.arc_info.items():
+        true_flow = arc_val['weight']
+        recovered_flow = recovered_arc_weights[arc]
+        if (true_flow != recovered_flow):
+            print("solution incorrect; arc {} has flow {},"
+                  " soln {}".format(arc, true_flow, recovered_flow))
 
-    arc_count = 0
-    for u, v, w in graph.edges():
-        if arc_weights[(u, v)] != w:
-            print("Arc ({},{}) has weight {} in the solution but {} in the"
-                  "graph.".format(u, v, arc_weights[(u, v)], w))
-        arc_count += 1
-    if arc_count != len(arc_weights):
-        print("Number of arcs in solution is different than number of arcs in"
-              "graph.")
-    else:
-        print("Solution and graph produce the same number of arcs.")
+# for weight, path in solution[1]:
+#     for u, v in zip(path[:-1], path[1:]):
+#         arc_weights[(u, v)] += weight
+#         vertices.add(u)
+#         vertices.add(v)
+#
+# if set(graph) != vertices:
+#     print("Vertex sets are different:")
+#     print("  Graph has vertices", set(graph))
+#     print("  Solution has vertices", vertices)
+#     return
+# else:    #
+# arc_count = 0
+# for u, v, w in graph.edges():
+#     if arc_weights[(u, v)] != w:
+#         print("Arc ({},{}) has weight {} in the solution but {} in the"
+#               "graph.".format(u, v, arc_weights[(u, v)], w))
+#     arc_count += 1
+# if arc_count != len(arc_weights):
+#     print("Number of arcs in solution is different than number
+#           of arcs in graph.")
+# else:
+#     print("Solution and graph produce the same number of arcs.")
 
 
 def convert_to_top_sorting(graph):

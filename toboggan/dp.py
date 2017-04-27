@@ -160,14 +160,13 @@ def recover_paths(instance, weights, silent=True):
                 # vertices might repeat in consecutive table entries if an edge
                 # is "long" wrt the topological ordering.  Don't add it twice
                 # to the path lists in this case.
-                print(v)
                 for p in incidence:
                     arc_used = conf.arcs_used[p]
                     if arc_used == -1:
                         break
-                    print("p {}, p_weight {}; arc {}, arc_weight {}"
-                          "".format(p, weights[p], arc_used,
-                                    graph.arc_info[arc_used]['weight']))
+                    # print("path {}, path weight {}; arc {}, flow {}"
+                    #       "".format(p, weights[p], arc_used,
+                    #                 graph.arc_info[arc_used]['weight']))
                     # if len(full_paths[p]) == 0 or full_paths[p][0] != v:
                     if len(full_paths[p][0]) == 0 or \
                             full_paths[p][0][0] != arc_used:

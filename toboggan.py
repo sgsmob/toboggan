@@ -16,6 +16,7 @@ from toboggan.guess_weight import solve
 from toboggan.parser import read_instances_verbose
 from toboggan.flow import Instance
 from toboggan.dp import recover_paths
+from toboggan.graphs import test_solution
 
 
 # Timeout context, see
@@ -206,4 +207,7 @@ if __name__ == "__main__":
             print("Path computation took{: .2f} "
                   "seconds".format(elapsed_path_time))
             print(paths)
+            # Check solution:
+            test_solution(reduced, paths)
+
         print()
