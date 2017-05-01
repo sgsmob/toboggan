@@ -232,13 +232,14 @@ class AdjList:
         plt.show()
 
 
-def print_out(self):
-    """Print the graph to screen."""
-    for node in range(len(self.out_arcs_lists)):
-        s = self.arc_info['start']
-        t = self.arc_info['destin']
-        w = self.arc_info['weight']
-        print("{} {} {}".format(s, t, w))
+    def print_out(self):
+        """Print the graph to screen."""
+        for node in range(len(self.out_arcs_lists)):
+            for arc in self.out_arsc_lists[node]:
+                s = self.arc_info[arc]['start']
+                t = self.arc_info[arc]['destin']
+                w = self.arc_info[arc]['weight']
+                print("{} {} {}".format(s, t, w))
 
 
 def test_paths(graph, pathset):
