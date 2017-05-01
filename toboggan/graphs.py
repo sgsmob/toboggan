@@ -234,8 +234,8 @@ class AdjList:
 
     def print_out(self):
         """Print the graph to screen."""
-        for node in range(len(self.out_arcs_lists)):
-            for arc in self.out_arsc_lists[node]:
+        for node in self.vertices:
+            for arc in self.out_arcs_lists[node]:
                 s = self.arc_info[arc]['start']
                 t = self.arc_info[arc]['destin']
                 w = self.arc_info[arc]['weight']
