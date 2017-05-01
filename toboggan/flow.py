@@ -117,24 +117,22 @@ class Instance:
         Note: input lists should contain int or float type.
         """
         # convert to dicts with contents as keys, multiplicities as vals
+        size1 = len(list1)
+        size2 = len(list2)
+
         dict1 = defaultdict(int)
         for item in list1:
             dict1[item] += 1
         dict2 = defaultdict(int)
         for item in list2:
             dict2[item] += 1
-        diffsum12 = 0
+        num_repeated = 0
         for key, val in dict1.items():
-            temp_diff = val - dict2[key]
-            if temp_diff > 0:
-                diffsum12 += temp_diff
-        diffsum21 = 0
-        for key, val in dict2.items():
-            temp_diff = val - dict1[key]
-            if temp_diff > 0:
-                diffsum21 += temp_diff
-
-        return max(diffsum12, diffsum21)
+            num_repeated += min(val, dict2[key])
+        size1 -= num_repeated
+        size2 -= num_repeated
+        return num_repeated + math.ceiling(max(size1, size2)/2) + \
+            min(size1, size2)
 
     def _optimal_size_lower_bound(self, k):
         """
@@ -173,9 +171,7 @@ class Instance:
                 # compute size of (larger) difference
                 weights1 = set([w for _, w in self.edge_cuts[which_cut1]])
                 weights2 = set([w for _, w in self.edge_cuts[which_cut2]])
-                multiset_diff = self._larger_multiset_diff(weights1, weights2)
-                bound = math.ceil(multiset_diff/2) + min(current_size1,
-                                                         current_size2)
+                bound = _compute_multiset_bound(weights1, weights2)
                 # Check if we need to update bound
                 if bound > lower_bound:
                     lower_bound = bound
