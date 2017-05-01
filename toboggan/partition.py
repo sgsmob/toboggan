@@ -11,7 +11,9 @@ Adapted from
 http://codereview.stackexchange.com/questions/1526/finding-all-k-subset-partitions
 """
 
+
 def algorithm_u(ns, m):
+    """Distribute ns objects over m buckets"""
     def visit(n, a):
         ps = [[] for i in range(m)]
         for j in range(n):

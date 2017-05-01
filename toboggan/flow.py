@@ -154,7 +154,6 @@ class Instance:
         sorted_cut_sizes = sorted([(cut_size, which_cut) for which_cut,
                                    cut_size in enumerate(edge_cut_sizes)],
                                   reverse=True)
-        cutsets_for_best_bound = []
         # Starting with largest, iterate over cutsets
         for idx1 in range(len(sorted_cut_sizes)):
             current_size1, which_cut1 = sorted_cut_sizes[idx1]
@@ -179,6 +178,7 @@ class Instance:
                 # Check if we need to update bound
                 if bound > lower_bound:
                     lower_bound = bound
+
         # let the user know their guess was bad if it was
         print("#\tGraph has an edge cut of size {}.\n"
               "#\tInvestigating cutsets yields bound {}.\n"

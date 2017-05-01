@@ -40,7 +40,7 @@ def solve(instance, silent=True, guessed_weights=None):
     # All k paths `end' at source
     old_table[PathConf(graph.source(), allpaths)] = set([globalconstr])
 
-    # Run DP
+    # run dynamic progamming
     for v in instance.ordering[:-1]:
         new_table = defaultdict(set)
         for paths, constraints in old_table.items():

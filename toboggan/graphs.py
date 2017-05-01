@@ -5,8 +5,6 @@
 #
 import copy
 from collections import defaultdict
-from operator import itemgetter
-import itertools
 
 
 class AdjList:

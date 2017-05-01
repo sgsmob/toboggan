@@ -13,7 +13,7 @@ import signal
 # local imports
 from os import path
 from toboggan.guess_weight import solve
-from toboggan.parser import read_instances_verbose
+from toboggan.parser import read_instances
 from toboggan.flow import Instance
 from toboggan.dp import recover_paths
 from toboggan.graphs import test_flow_cover
@@ -102,22 +102,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Splice flows into paths')
     parser.add_argument('file', help='a .graph file.'
                         ' Needs a .truth file in the same folder.')
-    parser.add_argument("--no_recovery",
-                        help="Only print the number of paths in an optimal"
-                        "decomposition, but do not recover the paths",
-                        action='store_true')
-    parser.add_argument('--timeout', help='Timeout in seconds', type=int)
-    parser.add_argument('--skip_truth', help='Skip checking .truth',
-                        action='store_true')
-    parser.add_argument('--disprove', help='Run instance with parameter k-1 '
-                        'instead of k (needs a .truth file)',
-                        action='store_true')
     parser.add_argument('--indices',
                         help='Either a file containing indices '
                         '(position in .graph file) on which to run, '
                         'or a list of indices separated by commas. '
                         'Ranges are accepted as well, e.g. "1,2-5,6"',
                         type=index_range)
+    parser.add_argument('--timeout', help='Timeout in seconds', type=int)
+    parser.add_argument('--skip_truth', help="Do not check for *.truth."
+                        " Instead, start from our computed lower-bound on k.",
+                        action='store_true')
+    parser.add_argument('--print_arcs', help="Make output include arc labels.",
+                        action='store_true')
+    parser.add_argument('--disprove', help='Run instance with parameter k-1 '
+                        'instead of k (needs a .truth file)',
+                        action='store_true')
+    parser.add_argument("--no_recovery", help="Only print the number of paths"
+                        " and their weights in an optimal decomposition, but"
+                        " do not recover the paths", action='store_true')
 
     args = parser.parse_args()
 
@@ -166,14 +168,16 @@ if __name__ == "__main__":
                 truth_file))
         truth_file = None
 
-    for graphdata, k, index in read_instances_verbose(graph_file,
-                                                      truth_file):
+    # Iterate over every graph-instance inside the input file
+    for graphdata, k, index in read_instances(graph_file, truth_file):
         graph, graphname, graphnumber = graphdata
 
         if instances and index not in instances:
             continue
         start = time.time()
         reduced, mapping = graph.contracted()
+        # reduced is the graph after contractions;
+        # mapping enables mapping paths on reduced back to paths in graph
 
         n = len(reduced)
         m = len(list(reduced.edges()))
@@ -199,7 +203,7 @@ if __name__ == "__main__":
         if bool(solution) and recover:
             weights = solution.pop().path_weights
             start_path_time = time.time()
-            print("Recovering the {} paths in the solution {}".format(
+            print("\tNow recovering the {} paths in the solution {}".format(
                                                                 instance.k,
                                                                 weights))
             paths = recover_paths(instance, weights)
@@ -208,8 +212,10 @@ if __name__ == "__main__":
                   "seconds".format(elapsed_path_time))
             # Check solution:
             test_flow_cover(reduced, paths)
+            print("Paths, weights pass test: flow decomposition confirmed.")
 
             # Print solutions
+            print("Solutions:")
             for path_deq, weight in paths:
                 real_path = []
                 for arc in path_deq:
@@ -219,5 +225,7 @@ if __name__ == "__main__":
                     node_seq.append(graph.arc_info[arc]['destin'])
                 print("\tPath with weight = {}".format(weight))
                 print("\t{}".format(node_seq))
+                if args.print_arcs:
+                    print("\tarc-labels: {}".format(real_path))
 
         print()
