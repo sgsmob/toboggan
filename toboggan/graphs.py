@@ -232,6 +232,15 @@ class AdjList:
         plt.show()
 
 
+def print_out(self):
+    """Print the graph to screen."""
+    for node in range(len(self.out_arcs_lists)):
+        s = self.arc_info['start']
+        t = self.arc_info['destin']
+        w = self.arc_info['weight']
+        print("{} {} {}".format(s, t, w))
+
+
 def test_paths(graph, pathset):
     for path in pathset:
         for i in range(len(path)-1):
@@ -318,12 +327,3 @@ def compute_edge_cuts(graph, ordering):
         top_cuts.append(eC)
 
     return top_cuts
-
-
-def print_out(self):
-    """Print the graph to screen."""
-    for node in range(len(self.out_arcs_lists)):
-        s = self.arc_info['start']
-        t = self.arc_info['destin']
-        w = self.arc_info['weight']
-        print("{} {} {}".format(s, t, w))
