@@ -114,6 +114,8 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--print_arcs', help="Make output include arc labels.",
                         action='store_true')
+    parser.add_argument('--print_contracted', help="Print contracted graph.",
+                        action='store_true')
     parser.add_argument('--disprove', help='Run instance with parameter k-1 '
                         'instead of k (needs a .truth file)',
                         action='store_true')
@@ -178,6 +180,8 @@ if __name__ == "__main__":
         reduced, mapping = graph.contracted()
         # reduced is the graph after contractions;
         # mapping enables mapping paths on reduced back to paths in graph
+        if args.print_contracted:
+            reduced.print_out()
 
         n = len(reduced)
         m = len(list(reduced.edges()))
