@@ -111,7 +111,7 @@ class Instance:
             bounds[i] = (lower, bounds[i][1])
         return np.array(bounds)
 
-    def _larger_multiset_diff(self, list1, list2):
+    def _compute_multiset_bound(self, list1, list2):
         """
         Treat twolists as multisets, return list1-list2.
         Note: input lists should contain int or float type.
@@ -131,7 +131,7 @@ class Instance:
             num_repeated += min(val, dict2[key])
         size1 -= num_repeated
         size2 -= num_repeated
-        return num_repeated + math.ceiling(max(size1, size2)/2) + \
+        return num_repeated + math.ceil(max(size1, size2)/3) + \
             min(size1, size2)
 
     def _optimal_size_lower_bound(self, k):
@@ -157,13 +157,13 @@ class Instance:
         for idx1 in range(len(sorted_cut_sizes)):
             current_size1, which_cut1 = sorted_cut_sizes[idx1]
             # once one set is too small, all following will be, so break out
-            if math.ceil(current_size1/2) + current_size1 <= lower_bound:
+            if math.ceil(current_size1/3) + current_size1 <= lower_bound:
                 break
             for idx2 in range(idx1+1, len(sorted_cut_sizes)):
                 current_size2, which_cut2 = sorted_cut_sizes[idx2]
                 # if cutsize2 too small, the rest will be: break inner for loop
                 temp_bound = min(current_size1, current_size2) + math.ceil(
-                    max(current_size1, current_size2)/2)
+                    max(current_size1, current_size2)/3)
                 if temp_bound <= lower_bound:
                     break
                 # Now compute actual bound for this pair of cutsets;
@@ -171,19 +171,13 @@ class Instance:
                 # compute size of (larger) difference
                 weights1 = set([w for _, w in self.edge_cuts[which_cut1]])
                 weights2 = set([w for _, w in self.edge_cuts[which_cut2]])
-                bound = _compute_multiset_bound(weights1, weights2)
+                bound = self._compute_multiset_bound(weights1, weights2)
                 # Check if we need to update bound
                 if bound > lower_bound:
                     lower_bound = bound
                     cutsets_of_best_bound = [which_cut1, which_cut2]
-        which_cut1, which_cut2 = cutsets_of_best_bound
-        # DEBUGGING
-        print("Cutset 1")
-        for arc, w in self.edge_cuts[which_cut1]:
-            print("{} {}".format(arc, w))
-        print("Cutset 2")
-        for arc, w in self.edge_cuts[which_cut2]:
-            print("{} {}".format(arc, w))
+        if len(cutsets_of_best_bound) > 0:
+            which_cut1, which_cut2 = cutsets_of_best_bound
 
         # let the user know their guess was bad if it was
         print("#\tGraph has an edge cut of size {}.\n"
