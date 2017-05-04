@@ -81,18 +81,18 @@ def find_opt_size(instance, maxtime):
     try:
         with timeout(seconds=maxtime):
             while True:
-                print("\tCalling guess_weight with k = {}".format(instance.k))
+                print("# \tCall guess_weight with k = {}".format(instance.k))
                 solutions = solve(instance, silent=True)
                 if bool(solutions):
                     break
                 instance.try_larger_k()
             elapsed = time.time() - start
-            print("Computation took {:.2f} seconds".format(elapsed))
-            print("Solutions:", solutions)
-            return solutions
+            print("# Weights computation took {:.2f} seconds".format(elapsed))
+            print("# Solution:", solutions)
+            return solutions, elapsed
     except TimeoutError:
         print("Timed out after {} seconds".format(maxtime))
-        return set()
+        return set(), maxtime
 
 
 if __name__ == "__main__":
@@ -118,6 +118,9 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--disprove', help='Run instance with parameter k-1 '
                         'instead of k (needs a .truth file)',
+                        action='store_true')
+    parser.add_argument('--experiment_info', help='Print out experiment-'
+                        'relevant info in format convenient for processing.',
                         action='store_true')
     parser.add_argument("--no_recovery", help="Only print the number of paths"
                         " and their weights in an optimal decomposition, but"
@@ -176,6 +179,13 @@ if __name__ == "__main__":
 
         if instances and index not in instances:
             continue
+        n_input = len(graph)
+        m_input = len(list(graph.edges()))
+        k_gtrue = k if k else "?"
+        print("\nGraph instance named {}:{} with n = {}, m = {}, and truth = "
+              "{}:".format(graphname, graphnumber, n_input, m_input,
+                           k if k else "?"),
+              flush=True)
         start = time.time()
         reduced, mapping = graph.contracted()
         # reduced is the graph after contractions;
@@ -187,49 +197,68 @@ if __name__ == "__main__":
         m = len(list(reduced.edges()))
 
         if len(reduced) <= 1:
-            print("Graph instance named {}:{} is"
-                  " trivial.\n".format(graphname, graphnumber))
-            continue
+            print("Trivial.")
+            # continue
+            k_improve = 1
+            k_opt = 1
+            k_cutset = 1
+            time_weights = 0
+            time_paths = 0
+            if m_input != 0:
+                weights = [list(graph.edges())[0][2]]
+            else:
+                weights = [0]
+        else:
+            if args.disprove and k:
+                k = k - 1
+                print("# Using parameter k-1")
 
-        if args.disprove and k:
-            k = k - 1
-            print("# Using parameter k-1")
-        print("Graph instance named {}:{} with n = {}, m = {}, and truth = {}:"
-              "".format(graphname, graphnumber,
-                        n, m, k if k else "?"), flush=True)
+            # create an instance of the graph
+            instance = Instance(reduced, k)
+            k_improve = instance.best_cut_lower_bound
+            print("# Reduced instance has n = {}, m = {}, and lower_bound "
+                  "= {}:".format(n, m, instance.k), flush=True)
 
-        # create an instance of the graph
-        instance = Instance(reduced, k)
+            k_cutset = instance.max_edge_cut_size
 
-        # find the optimal solution size
-        solution = find_opt_size(instance, maxtime)
-        # recover the paths in an optimal solution
-        if bool(solution) and recover:
-            weights = solution.pop().path_weights
-            start_path_time = time.time()
-            print("\tNow recovering the {} paths in the solution {}".format(
-                                                                instance.k,
-                                                                weights))
-            paths = recover_paths(instance, weights)
-            elapsed_path_time = time.time() - start_path_time
-            print("Path computation took{: .2f} "
-                  "seconds".format(elapsed_path_time))
-            # Check solution:
-            test_flow_cover(reduced, paths)
-            print("Paths, weights pass test: flow decomposition confirmed.")
+            # find the optimal solution size
+            solution_weights, time_weights = find_opt_size(instance, maxtime)
+            # recover the paths in an optimal solution
+            if bool(solution_weights) and recover:
+                weights = solution_weights.pop().path_weights
+                start_path_time = time.time()
+                print("#\tNow recovering the {} paths in the solution {}"
+                      "".format(instance.k, weights))
+                solution_paths = recover_paths(instance, weights)
+                time_paths = time.time() - start_path_time
+                print("# Recovery took{: .2f} "
+                      "seconds".format(time_paths))
+                # Check solution:
+                test_flow_cover(reduced, solution_paths)
+                print("# Paths, weights pass test: flow decomposition"
+                      "confirmed.")
+                # Print solutions
+                print("# Solutions:")
+                weight_vec = []
+                for path_deq, weight in solution_paths:
+                    real_path = []
+                    for arc in path_deq:
+                        real_path.extend(mapping[arc])
+                    node_seq = [graph.source()]
+                    for arc in real_path:
+                        node_seq.append(graph.arc_info[arc]['destin'])
+                    print("# \tPath with weight = {}".format(weight))
+                    weight_vec.append(weight)
+                    print("# \t{}".format(node_seq))
+                    if args.print_arcs:
+                        print("\tarc-labels: {}".format(real_path))
 
-            # Print solutions
-            print("Solutions:")
-            for path_deq, weight in paths:
-                real_path = []
-                for arc in path_deq:
-                    real_path.extend(mapping[arc])
-                node_seq = [graph.source()]
-                for arc in real_path:
-                    node_seq.append(graph.arc_info[arc]['destin'])
-                print("\tPath with weight = {}".format(weight))
-                print("\t{}".format(node_seq))
-                if args.print_arcs:
-                    print("\tarc-labels: {}".format(real_path))
-
-        print()
+        if args.experiment_info:
+            print("# All_info\tn_in\tm_in\tn_red\tm_red\tk_gtrue\tk_cut"
+                  "\tk_impro\tk_opt\ttime_w\ttime_p")
+            print("All_info\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
+                  "".format(n_input, m_input, n, m, k_gtrue, k_cutset,
+                            k_improve, len(weights), time_weights,
+                            time_paths))
+            print("weights\t", *[w for w in weights])
+        print("Finished instance.\n")

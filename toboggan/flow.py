@@ -147,6 +147,7 @@ class Instance:
         edge_cut_sizes = [len(C) for C in self.edge_cuts]
         max_edge_cut = max(edge_cut_sizes)
         lower_bound = max_edge_cut
+        self.max_edge_cut_size = max_edge_cut
 
         # Now check all pairs of cutsets "large enough" for better bound
         sorted_cut_sizes = sorted([(cut_size, which_cut) for which_cut,
@@ -180,6 +181,8 @@ class Instance:
             which_cut1, which_cut2 = cutsets_of_best_bound
 
         # let the user know their guess was bad if it was
+        self.best_cut_lower_bound = lower_bound
+        print("# Preprocessing")
         print("#\tGraph has an edge cut of size {}.\n"
               "#\tInvestigating cutsets yields bound {}.\n"
               "#\tUser supplied k value of {}.\n"
