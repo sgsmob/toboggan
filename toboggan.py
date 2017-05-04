@@ -165,11 +165,10 @@ if __name__ == "__main__":
     else:
         print("# Running on all instances")
 
-    if not args.skip_truth:
-        if path.isfile(truth_file):
-            print("# Using ground-truth from file {}".format(truth_file))
+    if path.isfile(truth_file):
+        print("# Ground-truth available in file {}".format(truth_file))
     else:
-        print("# Not using ground-truth. Guessing parameter.".format(
+        print("# No ground-truth available. Guessing parameter.".format(
                 truth_file))
         truth_file = None
 
@@ -182,6 +181,11 @@ if __name__ == "__main__":
         n_input = len(graph)
         m_input = len(list(graph.edges()))
         k_gtrue = k if k else "?"
+        k_opt = None
+        k_improve = 0
+        weights = []
+        time_weights = None
+        time_path = None
         print("\nGraph instance named {}:{} with n = {}, m = {}, and truth = "
               "{}:".format(graphname, graphnumber, n_input, m_input,
                            k if k else "?"),
@@ -214,6 +218,8 @@ if __name__ == "__main__":
                 print("# Using parameter k-1")
 
             # create an instance of the graph
+            if args.skip_truth:
+                k = 1
             instance = Instance(reduced, k)
             k_improve = instance.best_cut_lower_bound
             print("# Reduced instance has n = {}, m = {}, and lower_bound "
@@ -236,10 +242,11 @@ if __name__ == "__main__":
                 # Check solution:
                 test_flow_cover(reduced, solution_paths)
                 print("# Paths, weights pass test: flow decomposition"
-                      "confirmed.")
+                      " confirmed.")
                 # Print solutions
                 print("# Solutions:")
                 weight_vec = []
+                k_opt = len(weights)
                 for path_deq, weight in solution_paths:
                     real_path = []
                     for arc in path_deq:
@@ -258,7 +265,7 @@ if __name__ == "__main__":
                   "\tk_impro\tk_opt\ttime_w\ttime_p")
             print("All_info\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}"
                   "".format(n_input, m_input, n, m, k_gtrue, k_cutset,
-                            k_improve, len(weights), time_weights,
+                            k_improve, k_opt, time_weights,
                             time_paths))
             print("weights\t", *[w for w in weights])
         print("Finished instance.\n")
