@@ -129,6 +129,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     graph_file = args.file
+    filename = graph_file.split("/")[-1]
     tokens = path.basename(graph_file).split(".")
     tokens[-1] = ".truth"
     truth_file = path.join(path.dirname(graph_file), "".join(tokens))
@@ -186,10 +187,9 @@ if __name__ == "__main__":
         weights = []
         time_weights = None
         time_path = None
-        print("\nGraph instance named {}:{} with n = {}, m = {}, and truth = "
-              "{}:".format(graphname, graphnumber, n_input, m_input,
-                           k if k else "?"),
-              flush=True)
+        print("\nFile {} instance {} name {} with n = {}, m = {}, and truth = "
+              "{}:".format(filename, graphnumber, graphname, n_input,
+                           m_input, k if k else "?"), flush=True)
         start = time.time()
         reduced, mapping = graph.contracted()
         # reduced is the graph after contractions;
