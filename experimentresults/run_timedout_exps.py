@@ -13,25 +13,17 @@ def iterate_over_input_list(input_list,
             print(line)
             if line[0] == "#":  # skip that line
                 continue
-            else:
-                parts = line.strip().split()
-                if(len(parts) > 0):
-                    filename = parts[0]
-                    instancenum = parts[2]
-                    print(filename)
-                    print(instancenum)
+            parts = line.strip().split()
+            if(len(parts) > 0):
+                filename = parts[0]
+                instancenum = parts[1]
+                print(filename)
+                print(instancenum)
+                instancenum = int(instancenum) + 1
 
-
-    # # get all the files in the directory
-    # files = os.listdir(input_dir)
-    # for f in files:
-    #     name, extension = os.path.splitext(f)
-    #     # we only care about the graph files
-    #     if extension != ".graph":
-    #         continue
-    #     # open the graph file
-    #     print("Processing file {}".format(f))
-    #     subprocess.call("python3 ../toboggan.py {}/{} --skip_truth --experiment_info --timeout {} >> {}.txt".format(input_dir, f, timeout, results_file), shell=True)
+                subprocess.call("python3 ../toboggan.py {}/{} --indices {} "
+                    "--skip_truth --experiment_info --timeout {} >> {}.txt"
+                    "".format(input_dir, filename, instancenum, timeout, results_file), shell=True)
 
 
 def main(args):

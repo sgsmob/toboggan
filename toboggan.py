@@ -229,6 +229,7 @@ if __name__ == "__main__":
 
             # find the optimal solution size
             solution_weights, time_weights = find_opt_size(instance, maxtime)
+            time_paths = 0
             # recover the paths in an optimal solution
             if bool(solution_weights) and recover:
                 weights = solution_weights.pop().path_weights
