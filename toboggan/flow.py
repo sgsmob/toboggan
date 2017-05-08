@@ -111,30 +111,28 @@ class Instance:
             bounds[i] = (lower, bounds[i][1])
         return np.array(bounds)
 
-    def _larger_multiset_diff(self, list1, list2):
+    def _compute_multiset_bound(self, list1, list2):
         """
         Treat twolists as multisets, return list1-list2.
         Note: input lists should contain int or float type.
         """
         # convert to dicts with contents as keys, multiplicities as vals
+        size1 = len(list1)
+        size2 = len(list2)
+
         dict1 = defaultdict(int)
         for item in list1:
             dict1[item] += 1
         dict2 = defaultdict(int)
         for item in list2:
             dict2[item] += 1
-        diffsum12 = 0
+        num_repeated = 0
         for key, val in dict1.items():
-            temp_diff = val - dict2[key]
-            if temp_diff > 0:
-                diffsum12 += temp_diff
-        diffsum21 = 0
-        for key, val in dict2.items():
-            temp_diff = val - dict1[key]
-            if temp_diff > 0:
-                diffsum21 += temp_diff
-
-        return max(diffsum12, diffsum21)
+            num_repeated += min(val, dict2[key])
+        size1 -= num_repeated
+        size2 -= num_repeated
+        return num_repeated + math.ceil(max(size1, size2)/3) + \
+            min(size1, size2)
 
     def _optimal_size_lower_bound(self, k):
         """
@@ -149,23 +147,24 @@ class Instance:
         edge_cut_sizes = [len(C) for C in self.edge_cuts]
         max_edge_cut = max(edge_cut_sizes)
         lower_bound = max_edge_cut
+        self.max_edge_cut_size = max_edge_cut
 
         # Now check all pairs of cutsets "large enough" for better bound
         sorted_cut_sizes = sorted([(cut_size, which_cut) for which_cut,
                                    cut_size in enumerate(edge_cut_sizes)],
                                   reverse=True)
-        cutsets_for_best_bound = []
+        cutsets_of_best_bound = []
         # Starting with largest, iterate over cutsets
         for idx1 in range(len(sorted_cut_sizes)):
             current_size1, which_cut1 = sorted_cut_sizes[idx1]
             # once one set is too small, all following will be, so break out
-            if math.ceil(current_size1/2) + current_size1 <= lower_bound:
+            if math.ceil(current_size1/3) + current_size1 <= lower_bound:
                 break
             for idx2 in range(idx1+1, len(sorted_cut_sizes)):
                 current_size2, which_cut2 = sorted_cut_sizes[idx2]
                 # if cutsize2 too small, the rest will be: break inner for loop
                 temp_bound = min(current_size1, current_size2) + math.ceil(
-                    max(current_size1, current_size2)/2)
+                    max(current_size1, current_size2)/3)
                 if temp_bound <= lower_bound:
                     break
                 # Now compute actual bound for this pair of cutsets;
@@ -173,13 +172,17 @@ class Instance:
                 # compute size of (larger) difference
                 weights1 = set([w for _, w in self.edge_cuts[which_cut1]])
                 weights2 = set([w for _, w in self.edge_cuts[which_cut2]])
-                multiset_diff = self._larger_multiset_diff(weights1, weights2)
-                bound = math.ceil(multiset_diff/2) + min(current_size1,
-                                                         current_size2)
+                bound = self._compute_multiset_bound(weights1, weights2)
                 # Check if we need to update bound
                 if bound > lower_bound:
                     lower_bound = bound
+                    cutsets_of_best_bound = [which_cut1, which_cut2]
+        if len(cutsets_of_best_bound) > 0:
+            which_cut1, which_cut2 = cutsets_of_best_bound
+
         # let the user know their guess was bad if it was
+        self.best_cut_lower_bound = lower_bound
+        print("# Preprocessing")
         print("#\tGraph has an edge cut of size {}.\n"
               "#\tInvestigating cutsets yields bound {}.\n"
               "#\tUser supplied k value of {}.\n"
@@ -490,21 +493,25 @@ class PathConf:
     """Class representing paths ending in a set of vertices."""
 
     def __init__(self, vertex=None, paths=None):
+        # paths is a dict mapping from vertex to set of paths crossing it
         self.paths = {}
+        # arcs_used is a dict mapping path to arc it crossed to get to vertex
+        self.arcs_used = {}
         if vertex is not None:
             self.paths[vertex] = frozenset(paths)
+            for path in paths:
+                self.arcs_used[path] = -1
 
     def copy(self):
         res = PathConf()
         for v, paths in self.paths.items():
             res.paths[v] = frozenset(paths)
+        res.arcs_used = {}
+        for key, val in self.arcs_used.items():
+            res.arcs_used[key] = val
         return res
 
     def __iter__(self):
-        # return iter(self.paths.items())
-        # THIS CHANGE POTENTIALLY DANGEROUS
-        # so intead we didn't make this change,
-        #  and altered the way dp.solve_and_recover iterates over conf
         return iter(self.paths)
 
     def __contains__(self, v):
@@ -519,7 +526,8 @@ class PathConf:
     def __repr__(self):
         res = "PathConf("
         for v in self.paths:
-            res += "{}: {}, ".format(v, list(self.paths[v]))
+            res += "{}: {}, ".format(v, list((p, self.arcs_used[p]) for p in
+                                             self.paths[v]))
         return res[:-2] + ")"
 
     def __eq__(self, other):
@@ -555,17 +563,22 @@ class PathConf:
             raise ValueError("{} has no paths running through it.".format(v))
         if len(edges) == 0:
             raise ValueError("{} has no edges exiting it".format(v))
-        for dist in distribute(self.paths[v], edges):
-            res = self.copy()
-            del res.paths[v]  # Copy old paths, remove paths ending in v
-            for e, p in dist:  # Push paths over prescribed edges
-                t, w = e
-                if t in res.paths:
-                    res.paths[t] = frozenset(res.paths[t] | set(p))
+        for path_distribution in distribute(self.paths[v], edges):
+            res = self.copy()  # Copy old paths,
+            for p in res.paths[v]:
+                del res.arcs_used[p]  # remove paths ending in v
+            del res.paths[v]
+            # Push paths over prescribed edges
+            for arc, pathset in path_distribution:
+                tail, _, arc_label = arc
+                if tail in res.paths:
+                    res.paths[tail] = frozenset(res.paths[tail] | set(pathset))
                 else:
-                    res.paths[t] = frozenset(p)
+                    res.paths[tail] = frozenset(pathset)
+                for path in pathset:
+                    res.arcs_used[path] = arc_label
 
-            yield res, dist
+            yield res, path_distribution
 
 
 def distribute(paths, edges):

@@ -5,8 +5,6 @@
 #
 import copy
 from collections import defaultdict
-from operator import itemgetter
-import itertools
 
 
 class AdjList:
@@ -18,43 +16,35 @@ class AdjList:
         self.vertices = set()
         self.adj_list = defaultdict(list)
         self.inverse_adj_list = defaultdict(list)
-
-    def subgraph(self, vertices):
-        res = AdjList(self.graph_file, self.graph_number, self.name,
-                      len(vertices))
-        for x in vertices:
-            for y, f in self.out_neighborhood(x):
-                if y in vertices:
-                    res.add_edge(x, y, f)
-        return res
-
-    def append(self, other):
-        """Identify sink of this graph with source of the next graph."""
-        sink = self.sink()
-        other_source = other.source()
-
-        # Make sure vertex ids are disjoint
-        vertices = set(list(iter(self)))
-        index = max(vertices) + 1
-        remap = {}
-        for v in other:
-            if v in vertices:
-                remap[v] = index
-                index += 1
-            else:
-                remap[v] = v
-
-        # Identify source of other graph with this one's sink
-        remap[other_source] = sink
-
-        for u, w, f in other.edges():
-            self.add_edge(remap[u], remap[w], f)
+        self.out_arcs_lists = defaultdict(list)
+        self.in_arcs_lists = defaultdict(list)
+        self.arc_info = defaultdict(list)
+        self.max_arc_label = 0
 
     def add_edge(self, u, v, flow):
         self.vertices.add(u)
         self.vertices.add(v)
         self.adj_list[u].append((v, flow))
         self.inverse_adj_list[v].append((u, flow))
+
+        this_label = self.max_arc_label
+        self.arc_info[this_label] = {
+                                    'start': u,
+                                    'destin': v,
+                                    'weight': flow
+        }
+        self.out_arcs_lists[u].append(this_label)
+        self.in_arcs_lists[v].append(this_label)
+        self.max_arc_label += 1
+
+    def out_arcs(self, node):
+        return self.out_arcs_lists[node]
+
+    def in_arcs(self, node):
+        return self.in_arcs_lists[node]
+
+    def arcs(self):
+        return self.arc_info.items()
 
     def __len__(self):
         return len(self.vertices)
@@ -73,6 +63,17 @@ class AdjList:
             if self.out_degree(v) == 0:
                 return v
         raise TypeError("This graph has no sink")
+
+    def labeled_neighborhood(self, u):
+        if u in self.adj_list:
+            res = []
+            for arc in self.out_arcs_lists[u]:
+                dest = self.arc_info[arc]['destin']
+                flow = self.arc_info[arc]['weight']
+                res.append([dest, flow, arc])
+            return res
+        else:
+            return []
 
     def neighborhood(self, u):
         if u in self.adj_list:
@@ -103,6 +104,9 @@ class AdjList:
                       len(self))
         res.adj_list = copy.deepcopy(self.adj_list)
         res.inverse_adj_list = copy.deepcopy(self.inverse_adj_list)
+        res.out_arcs_lists = copy.deepcopy(self.out_arcs_lists)
+        res.in_arcs_lists = copy.deepcopy(self.in_arcs_lists)
+        res.arc_info = copy.deepcopy(self.arc_info)
         res.vertices = set(self.vertices)
         return res
 
@@ -131,55 +135,54 @@ class AdjList:
         1 or v has in degree 1 are contracted.
         """
         res = self.copy()
+        arc_mapping = {e: [e] for e, _ in res.arcs()}
         # contract out degree 1 vertices
         for u in list(res):
             if res.out_degree(u) == 1:
-                v = res.out_neighborhood(u)[0][0]
-                # print("{} has out degree 1 to {}".format(u,v))
-                res.contract_edge(u, v, keep_source=False)
+                # print(u, res.out_arcs(u))
+                arc = res.out_arcs(u)[0]
+                # mark u's inarcs to know they use the arc to be contracted
+                for a in res.in_arcs(u):
+                    arc_mapping[a].extend(arc_mapping[arc])
+                # contract the edge
+                res.contract_edge(arc, keep_source=False)
         # contract in degree 1 vertices
         for v in list(res):
             if res.in_degree(v) == 1:
-                u = res.in_neighborhood(v)[0][0]
+                arc = res.in_arcs(v)[0]
+                # mark v's outarcs to know they use the arc to be contracted
+                for a in res.out_arcs(v):
+                    new_path = list(arc_mapping[arc])
+                    new_path.extend(arc_mapping[a])
+                    arc_mapping[a] = new_path
                 # print("{} has in degree 1 from {}".format(v,u))
-                res.contract_edge(u, v, keep_source=True)
-        return res
+                res.contract_edge(arc, keep_source=True)
+        return res, arc_mapping
 
-    def contract_edge(self, u, v, keep_source=True):
+    def contract_edge(self, e, keep_source=True):
         """
-        Contract the arc from u to v.
+        Contract the arc e.
 
         If keep_source is true, the resulting vertex retains the label of the
         source, otherwise it keeps the sink's
         """
-        # print("Edges:")
-        # for e in sorted(self.edges()):
-        #    print(e)
-        # print("Inverse Edges:")
-        # for e in sorted(self.reverse_edges()):
-        #    print(e)
-        # delete the arc u v
-        # find where v is in the adjacency list
-        for i, edge in enumerate(self.out_neighborhood(u)):
-            w, f = edge
-            if w == v:
-                break
-        else:
-            raise ValueError("{} not an out neighbor of {}".format(v, u))
-        # find where u is in the inverse adjacency list
-        for j, edge in enumerate(self.in_neighborhood(v)):
-            w, f = edge
-            if w == u:
-                break
-        else:
-            raise ValueError("{} not an in neighbor of {}".format(u, v))
+        u = self.arc_info[e]["start"]
+        v = self.arc_info[e]["destin"]
+        w = self.arc_info[e]["weight"]
+
+        i = self.out_arcs(u).index(e)
+        j = self.in_arcs(v).index(e)
         # move last neighbor into position of uv arc and delete arc
         self.adj_list[u][i] = self.adj_list[u][-1]
         self.adj_list[u] = self.adj_list[u][:-1]
+        self.out_arcs_lists[u][i] = self.out_arcs_lists[u][-1]
+        self.out_arcs_lists[u] = self.out_arcs_lists[u][:-1]
 
         # move last neighbor into position of uv arc and delete arc
         self.inverse_adj_list[v][j] = self.inverse_adj_list[v][-1]
         self.inverse_adj_list[v] = self.inverse_adj_list[v][:-1]
+        self.in_arcs_lists[v][j] = self.in_arcs_lists[v][-1]
+        self.in_arcs_lists[v] = self.in_arcs_lists[v][:-1]
 
         # to keep things concise, use the label a for the vertex to keep
         # and label b for the vertex to discard
@@ -187,16 +190,22 @@ class AdjList:
 
         # update out-neighbors of a
         self.adj_list[a].extend(self.out_neighborhood(b))
+        self.out_arcs_lists[a].extend(self.out_arcs_lists[b])
         # make out-neighbors of b point back to a
-        for w, f in self.out_neighborhood(b):
+        for lab, edge in zip(self.out_arcs(b), self.out_neighborhood(b)):
+            w, f = edge
             i = self.inverse_adj_list[w].index((b, f))
+            self.arc_info[lab]["start"] = a
             self.inverse_adj_list[w][i] = (a, f)
 
         # update in-neighbors of a
         self.inverse_adj_list[a].extend(self.in_neighborhood(b))
+        self.in_arcs_lists[a].extend(self.in_arcs_lists[b])
         # make in neighbors of b point to a
-        for w, f in self.in_neighborhood(b):
+        for lab, edge in zip(self.in_arcs(b), self.in_neighborhood(b)):
+            w, f = edge
             i = self.adj_list[w].index((b, f))
+            self.arc_info[lab]["destin"] = a
             self.adj_list[w][i] = (a, f)
 
         if b in self.adj_list:
@@ -204,6 +213,7 @@ class AdjList:
         if b in self.inverse_adj_list:
             del self.inverse_adj_list[b]
         self.vertices.remove(b)
+        del self.arc_info[e]
 
     def reversed(self):
         res = AdjList(self.graph_file, self.graph_number, self.name,
@@ -222,34 +232,43 @@ class AdjList:
         plt.show()
 
 
-def test_solution(graph, solution):
-    arc_weights = defaultdict(int)
-    vertices = set()
-    for weight, path in solution[1]:
-        for u, v in zip(path[:-1], path[1:]):
-            arc_weights[(u, v)] += weight
-            vertices.add(u)
-            vertices.add(v)
+    def print_out(self):
+        """Print the graph to screen."""
+        for node in self.vertices:
+            for arc in self.out_arcs_lists[node]:
+                s = self.arc_info[arc]['start']
+                t = self.arc_info[arc]['destin']
+                w = self.arc_info[arc]['weight']
+                print("{} {} {}".format(s, t, w))
 
-    if set(graph) != vertices:
-        print("Vertex sets are different:")
-        print("  Graph has vertices", set(graph))
-        print("  Solution has vertices", vertices)
-        return
-    else:
-        print("Graph and solution have same vertex set.")
 
-    arc_count = 0
-    for u, v, w in graph.edges():
-        if arc_weights[(u, v)] != w:
-            print("Arc ({},{}) has weight {} in the solution but {} in the"
-                  "graph.".format(u, v, arc_weights[(u, v)], w))
-        arc_count += 1
-    if arc_count != len(arc_weights):
-        print("Number of arcs in solution is different than number of arcs in"
-              "graph.")
-    else:
-        print("Solution and graph produce the same number of arcs.")
+def test_paths(graph, pathset):
+    for path in pathset:
+        for i in range(len(path)-1):
+            start = path[i]
+            dest = path[i+1]
+            for u, _ in graph.neighborhood(start):
+                if u == dest:
+                    break
+            else:
+                raise ValueError("Solution contains path with non-sequential"
+                                 "vertices: {}, {}".format(start, dest))
+
+
+def test_flow_cover(graph, solution):
+    # Decode the solution set of paths
+    recovered_arc_weights = defaultdict(int)
+    for path_object in solution:
+        path_deq, path_weight = path_object
+        for arc in path_deq:
+            recovered_arc_weights[arc] += path_weight
+    # Check that every arc has its flow covered
+    for arc, arc_val in graph.arc_info.items():
+        true_flow = arc_val['weight']
+        recovered_flow = recovered_arc_weights[arc]
+        if (true_flow != recovered_flow):
+            print("SOLUTION INCORRECT; arc {} has flow {},"
+                  " soln {}".format(arc, true_flow, recovered_flow))
 
 
 def convert_to_top_sorting(graph):
@@ -271,25 +290,6 @@ def convert_to_top_sorting(graph):
     visit(source, ordering)
 
     return ordering
-
-
-def top_sorting_graph_representation(graph, ordering):
-    n = len(ordering)
-    mapping = {}
-
-    res = []
-
-    for i, v in enumerate(ordering):
-        mapping[v] = i
-
-    for i in range(n):
-        u = ordering[i]
-        neighborhood = graph.neighborhood(u)
-        dag_neighborhood = list(map(lambda pair: (mapping[pair[0]], pair[1]),
-                                neighborhood))
-        res.append(dag_neighborhood)
-
-    return res
 
 
 def compute_cuts(graph, ordering):

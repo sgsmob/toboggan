@@ -40,14 +40,14 @@ def solve(instance, silent=True, guessed_weights=None):
     # All k paths `end' at source
     old_table[PathConf(graph.source(), allpaths)] = set([globalconstr])
 
-    # Run DP
+    # run dynamic progamming
     for v in instance.ordering[:-1]:
         new_table = defaultdict(set)
         for paths, constraints in old_table.items():
             # Distribute paths incoming to i onto its neighbours
             if not silent:
                 print("  Pushing {}".format(paths))
-            for newpaths, dist in paths.push(v, graph.out_neighborhood(v)):
+            for newpaths, dist in paths.push(v, graph.labeled_neighborhood(v)):
                 # if not silent:
                     # print("  Candidate paths", newpaths)
                 debug_counter = 0
@@ -123,18 +123,18 @@ def recover_paths(instance, weights, silent=True):
             # Distribute paths incoming to i onto its neighbors
             if not silent:
                 print("  Pushing {}".format(old_paths))
-            for new_paths, dist in old_paths.push(v, graph.neighborhood(v)):
+            for new_paths, dist in \
+                    old_paths.push(v, graph.labeled_neighborhood(v)):
                 # make sure the sets of paths that were pushed along each
                 # edge sum to the proper flow value.  If not, don't create a
                 # new table entry for this path set.
-                for e, P in dist:  # Paths P coincide on edge e
-                    success = globalconstr.add_constraint(P, e)
+                for arc, pathset in dist:  # Paths pathset coincide on arc
+                    success = globalconstr.add_constraint(pathset, arc)
                     if success is None:
-                        # print("Failure {}".format(new_paths))
                         break
                 else:
-                    # print("Success {}".format(new_paths))
-                    entries[new_paths] = old_paths
+                    if new_paths not in entries:
+                        entries[new_paths] = old_paths
 
         # add the new entries to the list of backpointers
         backptrs.append(entries)
@@ -145,15 +145,13 @@ def recover_paths(instance, weights, silent=True):
             print(bp)
 
     # recover the paths
-    full_paths = [deque() for _ in weights]
+    full_paths = [[deque(), weight] for weight in weights]
     try:
         # the "end" of the DP is all paths passing through the sink
-        conf = PathConf(graph.sink(), allpaths)
+        # conf = PathConf(graph.sink(), allpaths)
+        conf = list(backptrs[-1].keys())[0]
         # iterate over the backpointer list in reverse
         for table in reversed(backptrs):
-            # for v, incidence in conf:
-            # CHANGE BECAUSE PathConf iteration doesn't return .items()
-            # print(table[conf])
             for v in conf:
                 # get the paths crossing this vertex
                 incidence = conf[v]
@@ -161,8 +159,12 @@ def recover_paths(instance, weights, silent=True):
                 # is "long" wrt the topological ordering.  Don't add it twice
                 # to the path lists in this case.
                 for p in incidence:
-                    if len(full_paths[p]) == 0 or full_paths[p][0] != v:
-                        full_paths[p].appendleft(v)
+                    arc_used = conf.arcs_used[p]
+                    if arc_used == -1:
+                        break
+                    if len(full_paths[p][0]) == 0 or \
+                            full_paths[p][0][0] != arc_used:
+                        full_paths[p][0].appendleft(arc_used)
             # traverse the pointer backwards
             conf = table[conf]
     except KeyError as e:
