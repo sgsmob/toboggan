@@ -60,7 +60,7 @@ def is_feasible(weights, flow, max_weight):
 
 
 def solve(instance, silent=True, max_weight_lower=1,
-          max_weight_upper=float('inf'), scoring="sink distance"):
+          max_weight_upper=float('inf')):
     """Solve the provided instance of path-flow decomposition."""
     flow = instance.flow
     k = instance.k
@@ -85,18 +85,27 @@ def solve(instance, silent=True, max_weight_lower=1,
     if not silent:
         print(instance.weights, feasible_weights)
 
-    # figure out whether we get the first or last positions for free
+    # figure out whether we get some of the first or last positions for free
     largest_free = False
     smallest_free = False
+    ones_count = 0
     # check largest weight first
     if instance.max_weight_bounds[0] == instance.max_weight_bounds[1]:
         largest_free = True
         largest = instance.max_weight_bounds[0]
     if min(instance.weights) == 1:
         smallest_free = True
-        smallest = 1
+        # check how many times 1 appears as a weight in a cutset
+        ones_count = max(sum(1 for e in C if e[1] == 1)
+                         for C in instance.edge_cuts)
+        smallest = [1 for _ in range(ones_count)]
+        # get an early out if an entry that needs to be 1 conflicts with its
+        # lower bound
+        for upper, lower in instance.weight_bounds[:ones_count]:
+            if lower != 1:
+                return set()
 
-    positions = list(range(int(smallest_free), k-int(largest_free)))
+    positions = list(range(ones_count, k-int(largest_free)))
 
     # iterate over the number of unguessed weights
     for diff in range(k+1):
@@ -120,7 +129,8 @@ def solve(instance, silent=True, max_weight_lower=1,
 
                 # add in free values
                 if smallest_free:
-                    weights[0] = smallest
+                    weights[:ones_count] = smallest
+                    assert len(weights) == k
                 if largest_free:
                     weights[k-1] = largest
 
