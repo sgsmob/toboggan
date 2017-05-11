@@ -24,11 +24,12 @@ def iterate_over_input_list(input_list,input_dir,path_to_catfish):
         for line in instancelist:
             print(line)
             if line[0] == "#":  # skip that line
-            continue
+                continue
             parts = line.strip().split()
             if(len(parts) > 0):
-            filename = os.path.join(input_dir, parts[0])
-            print(filename)
+                name = "{}{}.sgr".format(*parts)
+                filename = os.path.join(input_dir, parts)
+                print(filename)
 
 
         call_tob(filename, tob_results)
