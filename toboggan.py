@@ -131,10 +131,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     graph_file = args.file
-    filename = graph_file.split("/")[-1]
-    tokens = path.basename(graph_file).split(".")
-    tokens[-1] = ".truth"
-    truth_file = path.join(path.dirname(graph_file), "".join(tokens))
+    filename = path.basename(graph_file)
+    truth_file = "{}.truth".format(path.splitext(graph_file)[0])
 
     maxtime = args.timeout
     if maxtime:

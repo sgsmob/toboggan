@@ -7,9 +7,24 @@
 from toboggan.graphs import AdjList
 # python libs
 import re
+import os
 
 header_regex = re.compile('# graph number = ([0-9]*) name = (.*)')
 edge_regex = re.compile('(\d*) (\d*) (\d*\.\d*)')
+
+
+def read_sgr(graph_file):
+    """Read a single graph from a .sgr file."""
+    with open(graph_file, 'r') as f:
+        num_nodes = int(f.readline().strip())
+        graph = AdjList(graph_file, None, None, num_nodes)
+        for line in f:
+            edge_data = line.split()
+            u = int(edge_data[0])
+            v = int(edge_data[1])
+            flow = int(float(edge_data[2]))
+            graph.add_edge(u, v, flow)
+        return graph, None, 0
 
 
 def enumerate_graphs(graph_file):
@@ -100,7 +115,9 @@ def enumerate_decompositions(decomposition_file):
 
 def read_instances(graph_file, truth_file):
     index = 0
-    if truth_file:
+    if os.path.splitext(graph_file)[1] == ".sgr":
+        yield read_sgr(graph_file), None, 0
+    elif truth_file:
         for graphdata, truthdata in zip(enumerate_graphs(graph_file),
                                         enumerate_decompositions(
                                         truth_file)):
