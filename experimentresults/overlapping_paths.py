@@ -8,40 +8,49 @@ import subprocess
 #look at the path outputs
 
 def call_tob(input_file,  results_file):
-    subprocess.call("python3 ../toboggan.py {}  "
-                    "--skip_truth --experiment_info  > {}.txt"
-                    "".format(input_file, results_file), shell=True)
+    with open(results_file, 'w') as f:
+        out = subprocess.run("python ../toboggan.py {} "
+                             "--skip_truth "
+                             "".format(input_file, results_file),
+                              stdout=subprocess.PIPE, shell=True)
+        # print(out.stdout.decode())
+        f.write(out.stdout.decode())
 
 def call_cf(path_to_catfish, input_file, output_file):
-    subprocess.call("{} -i {} -o {}".format(path_to_catfish, input_file, output_file), shell=True) 
+    subprocess.run("{} -i {} -o {}".format(path_to_catfish, input_file,
+                                            output_file),
+                   stdout=subprocess.DEVNULL, shell=True) 
 
 def iterate_over_input_list(input_list,input_dir,path_to_catfish):
 
-    tob_results = ".tob_results.txt"
-    cf_results = ".cf_results.txt"
+    tob_results = os.path.join(os.getcwd(),".tob_results.txt")
+    cf_results = os.path.join(os.getcwd(),".cf_results.txt")
                             
     with open(input_list, 'r') as instancelist:
         for line in instancelist:
-            print(line)
+            #print(line)
             if line[0] == "#":  # skip that line
                 continue
             parts = line.strip().split()
-            if(len(parts) > 0):
-                name = "{}{}.sgr".format(*parts)
-                filename = os.path.join(input_dir, parts)
-                print(filename)
+            if (len(parts) == 0):
+                continue
+            name = "{}.{}.sgr".format(*parts)
+            filename = os.path.join(input_dir, name)
+            print(os.path.basename(filename))
+
+            call_tob(filename, tob_results)
+            call_cf(path_to_catfish, filename, cf_results)
 
 
-        call_tob(filename, tob_results)
-        call_cf(path_to_catfish, filename, cf_results)
+            #read contents of temp files
+            tob_paths = tob_output_parser(tob_results)
+            cf_paths = cf_output_parser(cf_results)
 
-
-        #read contents of temp files
-        tob_paths = tob_output_parser(".tob_results.txt")
-        cf_paths = cf_output_parser(".cf_results.txt")
-
-        #contrast temp files
-        print("intersection size: {} toboggan size: {} catfish size: {}".format(len(tob_paths & cf_paths), len(tob_paths), len(cf_paths)) )
+            #contrast temp files
+            print("intersection size: {} toboggan size: {} catfish size: {}"
+                  "\n".format(len(tob_paths & cf_paths),
+                              len(tob_paths),
+                              len(cf_paths)) )
 
 def tob_output_parser(tob_results):
 
@@ -50,11 +59,9 @@ def tob_output_parser(tob_results):
     
     with open(tob_results, 'r') as reader:
         for line in reader:
-            if line == "# Solutions:":
+            if line.startswith("#") and "Solutions:" in line:
                 paths_found = True
-            if paths_found == True:
-                if line.startswith("#   Path with weight ="):
-                    continue
+            elif paths_found == True and '[' in line:
                 tob_paths.add(line[1:].strip())
     return tob_paths
             
