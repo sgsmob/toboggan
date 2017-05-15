@@ -254,9 +254,60 @@ class Constr:
         self.hashvalue = hash(row.data.tobytes()) ^ hash((self.instance.k,
                                                           self.instance.flow))
         self.A = np.matrix(row)
+        self.rank = 1
+        self.utri = [row]
+        # pivot_lookup[j] gives the row_index of pivot in column j
+        # This is to avoid having to permute utri to be in RREF
+        self.pivot_lookup = [-1 for j in range(len(row))]
+        self.pivot_lookup[0] = 0
 
     def __repr__(self):
         return str(self.A)
+
+    def _copy_with_new_row(self, row, reduced_row, pivot_idx):
+        res = Constr(self.instance)
+
+        # Find index to insert that maintains order
+        i = 0
+        fc = self.A.shape[1] - 1  # Column with f-values
+        while self.instance.flow > self.A[i, fc]:
+            i += 1
+
+        # Tie-break in case flow values are the same
+        # row_repr = np.packbits(row[:-1])
+        bitlen = len(row)-1
+        # Similar to np.packbits, but works for more than 8 paths.
+        row_repr = row[:-1].dot(Constr.POW2[:bitlen])
+        try:
+            while self.instance.flow == self.A[i, fc] and \
+                    row_repr < self.A[i, :-1].dot(Constr.POW2[:bitlen]):
+                i += 1
+        except ValueError as e:
+            print(">>>>>>>>>>>>>")
+            print(row)
+            print(row_repr)
+            print(self.A[i, :-1])
+            print(Constr.POW2[:bitlen])
+            print("<<<<<<<<<<<<<")
+            raise(e)
+
+        res.A = np.insert(self.A, i, row, axis=0)
+        # update hashvalue by new row
+        res.hashvalue ^= hash(row.data.tobytes())
+        res.known_values = list(self.known_values)
+        res.rank = self.rank + 1
+
+        # Ensure res.utri (with row added) is in RREF form.
+        pivot_value = reduced_row[pivot_idx]
+        if pivot_value != 1:
+            reduced_row = reduced_row/pivot_value
+        for idx in range(len(res.utri)):
+            val = res.utri[idx][pivot_idx]
+            if val != 0:
+                res.utri[idx] -= reduced_row*val
+        res.utri.append(reduced_row)
+        res.pivot_lookup[pivot_idx] = res.rank
+        return res
 
     def is_redundant(self):
         # We can reduce the number of redundant solutions by imposing that
@@ -293,10 +344,30 @@ class Constr:
 
         return False
 
+    def _check_lin_dep(self, input_vector):
+        """Checks if input_vector is in rowspan of A"""
+        current_pivot = len(input_vector) + 1
+        vector = input_vector.copy()
+        for col_idx in range(len(vector)):
+            val = vector[col_idx]
+            if val != 0:
+                # check for pivot above it
+                row_idx = self.pivot_lookup[col_idx]
+                if row_idx != -1:  # if vector entry lies under a pivot, reduce
+                    vector = vector - val * self.utri[row_idx]
+                elif current_pivot == len(input_vector) + 1:
+                    current_pivot = col_idx
+
+        if current_pivot < len(vector)-1:
+            return Constr.VALID, current_pivot, vector
+        elif current_pivot == len(vector)-1:
+            return Constr.INFEASIBLE, None, None
+        else:
+            return Constr.REDUNDANT, None, None
+
     def _test_row(self, row):
-        # Check whether b is lin. dep. on rows in M
-        coeff, residuals, rank, _ = np.linalg.lstsq(self.A.transpose(),
-                                                    row.transpose())
+        # check whether b is lin. dep. on rows in utri
+        dependence_flag, pivot_idx, reduced_row = self._check_lin_dep(row)
 
         if rank == self.instance.k:
             M = self.A[:, :-1]
@@ -353,45 +424,30 @@ class Constr:
         if len(paths) > flow:
             return None
 
-        row_res, solution = self._test_row(row)
-        if row_res == Constr.REDUNDANT:
+        dependence_flag, pivot_idx, reduced_row = self._check_lin_dep(row)
+
+        if dependence_flag == Constr.REDUNDANT:
             return self
-        elif row_res == Constr.INFEASIBLE:
+        elif dependence_flag == Constr.INFEASIBLE:
             return None
-        elif row_res == Constr.SOLVED:
-            return solution  # Instance of SolvedConstr
+        # elif dependence_flag == Constr.SOLVED:
+        #     return solution  # Instance of SolvedConstr
 
-        assert(row_res == Constr.VALID)
+        assert(dependence_flag == Constr.VALID)
 
-        # Find index to insert that maintains order
-        i = 0
-        fc = self.A.shape[1] - 1  # Column with f-values
-        while flow > self.A[i, fc]:
-            i += 1
+        res = self._copy_with_new_row(row, reduced_row, pivot_idx)
 
-        # Tie-break in case flow values are the same
-        # row_repr = np.packbits(row[:-1])
-        bitlen = len(row)-1
-        # Similar to np.packbits, but works for more than 8 paths.
-        row_repr = row[:-1].dot(Constr.POW2[:bitlen])
-        try:
-            while flow == self.A[i, fc] and \
-                    row_repr < self.A[i, :-1].dot(Constr.POW2[:bitlen]):
-                i += 1
-        except ValueError as e:
-            print(">>>>>>>>>>>>>")
-            print(row)
-            print(row_repr)
-            print(self.A[i, :-1])
-            print(Constr.POW2[:bitlen])
-            print("<<<<<<<<<<<<<")
-            raise(e)
+        if res.rank == res.instance.k:
+            # COMPUTE WEIGHTS
+            # weights = np.linalg.solve(M, b).T
 
-        res = Constr(self.instance)
-        res.A = np.insert(self.A, i, row, axis=0)
-        # update hashvalue by new row
-        res.hashvalue ^= hash(row.data.tobytes())
-        res.known_values = list(self.known_values)
+            weights = weights.astype(float).tolist()
+            for i, w in enumerate(weights):
+                if w <= 0 or not w.is_integer():
+                    return Constr.INFEASIBLE, None
+                weights[i] = int(w)
+
+            return SolvedConstr(weights, self.instance)
 
         # Keep track of path-weights that are determined already.
         if len(paths) == 1:

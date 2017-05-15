@@ -32,7 +32,9 @@ def solve(instance, silent=True, guessed_weights=None):
     for index, guess in enumerate(guessed_weights):
         if guess is None:
             continue
-        globalconstr = globalconstr.add_constraint([index], (0, guess))
+        globalconstr, success = globalconstr.add_constraint([index], (0, guess))
+        if not success:
+            return set()
 
     # Build first DP table
     old_table = defaultdict(set)
@@ -56,19 +58,24 @@ def solve(instance, silent=True, guessed_weights=None):
                     # Update constraint-set constr with new constraints imposed
                     # by our choice of pushing paths o..........es (as
                     # described by dist)
-                    newconstr = constr
+                    curr_constr = constr
                     try:
                         for e, p in dist:  # Paths p coincide on edge e
-                            newconstr = newconstr.add_constraint(p, e)
-                    except ValueError as e:
+                            updated_constr = curr_constr.add_constraint(p, e)
+                            if updated_constr is not None:
+                                curr_constr = updated_constr
+                            else:
+                                break
+                        else:
+                            # WORRY ABOUT THIS EVENTUALLY
+                            if not curr_constr.is_redundant():
+                                # Add to DP table
+                                new_table[newpaths].add(curr_constr)
+                    except ValueError as err:
                         print("Problem while adding constraint", p, e)
-                        raise e
-                    except AttributeError:
-                        assert(newconstr is None)
-                        pass
+                        raise err
 
-                    if newconstr is None:
-                        pass  # Infeasible constraints
+                    """
                     elif newconstr.is_redundant():
                         if not silent:
                             print(".", end="")
@@ -84,7 +91,7 @@ def solve(instance, silent=True, guessed_weights=None):
                                 print()
                                 print("    New path-constr pair",
                                       newpaths, newconstr)
-                        new_table[newpaths].add(newconstr)  # Add to DP table
+                    """
         old_table = new_table
 
     if not silent:
