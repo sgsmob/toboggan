@@ -256,7 +256,8 @@ class Constr:
         self.A = np.zeros((self.instance.k, self.instance.k+1))
         self.A[0] = row
         self.rank = 1
-        self.utri = [row]
+        self.utri = np.zeros((self.instance.k, self.instance.k+1))
+        self.utri[0] = row
         # pivot_lookup[j] gives the row_index of pivot in column j
         # This is to avoid having to permute utri to be in RREF
         self.pivot_lookup = [-1 for j in range(len(row))]
@@ -316,19 +317,23 @@ class Constr:
         res.rank = self.rank + 1
 
         # copy the old RREF format
-        res.utri = copy.deepcopy(self.utri)
+        res.utri = self.utri.copy()
         res.pivot_lookup = copy.copy(self.pivot_lookup)
 
         # Ensure res.utri (with row added) is in RREF form.
+        # Make sure pivot is a 1
         pivot_value = reduced_row[pivot_idx]
         if pivot_value != 1:
             reduced_row = reduced_row/pivot_value
-        for idx in range(len(res.utri)):
-            val = res.utri[idx][pivot_idx]
+        # use new pivot to eliminate in other rows
+        for idx in range(self.rank):
+            val = res.utri[idx, pivot_idx]
             if val != 0:
-                res.utri[idx] = res.utri[idx] - reduced_row*val
-        res.utri.append(reduced_row)
-        res.pivot_lookup[pivot_idx] = res.rank-1
+                res.utri[idx, :] = res.utri[idx, :] - reduced_row*val
+        # update the resulting utri
+        res.utri[self.rank, :] = reduced_row
+        res.pivot_lookup[pivot_idx] = self.rank
+
         return res
 
     def is_redundant(self):
@@ -377,7 +382,7 @@ class Constr:
                 row_idx = self.pivot_lookup[col_idx]
                 if row_idx != -1:  # if vector entry lies under a pivot, reduce
                     try:
-                        vector = vector - val * self.utri[row_idx]
+                        vector = vector - val * self.utri[row_idx, :]
                     except IndexError:
                         print(self.utri)
                         print(col_idx)
@@ -393,52 +398,6 @@ class Constr:
             return Constr.INFEASIBLE, None, None
         else:
             return Constr.REDUNDANT, None, None
-
-    def _test_row(self, row):
-        # check whether b is lin. dep. on rows in utri
-        dependence_flag, pivot_idx, reduced_row = self._check_lin_dep(row)
-
-        if rank == self.instance.k:
-            M = self.A[:, :-1]
-            b = np.squeeze(np.array(self.A[:, -1]))
-            try:
-                weights = np.linalg.solve(M, b).T
-            except np.linalg.linalg.LinAlgError as e:
-                # Matrix is singular: we added a constraint that is linearly
-                # dependent to earlier constraints BUT its flow-value is
-                # different (otherwise it would be a redundant constraint).
-                # We can safely discard this solution.
-                return Constr.INFEASIBLE, None
-            except ValueError as e:
-                print("----------------------------")
-                print("  Numpy linalg solver crashed on th following input:")
-                print(M)
-                print(b)
-                print("----------------------------")
-                raise e
-
-            # We tried doing the following inside numpy, but ran into a numpy
-            # bug
-            weights = weights.astype(float).tolist()
-            for i, w in enumerate(weights):
-                if w <= 0 or not w.is_integer():
-                    return Constr.INFEASIBLE, None
-                weights[i] = int(w)
-
-            return Constr.SOLVED, SolvedConstr(weights, self.instance)
-
-        if len(residuals) == 0:
-            return Constr.INFEASIBLE, None
-
-        # residuals should be positive
-        residuals = residuals[0]
-        assert residuals >= 0, \
-            "Residuals not positive: {} {} {}".format(self.A, row, residuals)
-
-        if residuals < Constr.eps:
-            return Constr.REDUNDANT, None
-
-        return Constr.VALID, None
 
     def add_constraint(self, paths, edge):
         # Convert to constraint row
@@ -471,7 +430,7 @@ class Constr:
         if res.rank == res.instance.k:
             # COMPUTE WEIGHTS
             # weights = np.linalg.solve(M, b).T
-            weights = np.array(list(sorted(r[-1] for r in res.utri)))
+            weights = np.array(list(sorted(res.utri[:, -1])))
             weights = weights.astype(float).tolist()
             for i, w in enumerate(weights):
                 if w <= 0 or not w.is_integer():
