@@ -9,7 +9,7 @@
 import time
 import argparse
 import signal
-
+import cProfile
 # local imports
 from os import path
 from toboggan.guess_weight import solve
@@ -228,7 +228,12 @@ if __name__ == "__main__":
             k_cutset = instance.max_edge_cut_size
 
             # find the optimal solution size
+            prof = cProfile.Profile()
+            prof.enable()
             solution_weights, time_weights = find_opt_size(instance, maxtime)
+            prof.disable()
+            prof.print_stats('tottime')
+
             time_paths = 0
             # recover the paths in an optimal solution
             if bool(solution_weights) and recover:
