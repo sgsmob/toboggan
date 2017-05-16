@@ -68,30 +68,14 @@ def solve(instance, silent=True, guessed_weights=None):
                                 break
                         else:
                             # WORRY ABOUT THIS EVENTUALLY
-                            if not curr_constr.is_redundant():
+                            if constr.rank == curr_constr.rank or \
+                                    not curr_constr.is_redundant():
                                 # Add to DP table
                                 new_table[newpaths].add(curr_constr)
                     except ValueError as err:
                         print("Problem while adding constraint", p, e)
                         raise err
-
-                    """
-                    elif newconstr.is_redundant():
-                        if not silent:
-                            print(".", end="")
-                            debug_counter += 1
-                            if debug_counter > 80:
-                                debug_counter = 0
-                                print()
-                        pass  # Redundant constraints
-                    else:
-                        if not silent:
-                            if newpaths not in new_table or \
-                                    newconstr not in new_table[newpaths]:
-                                print()
-                                print("    New path-constr pair",
-                                      newpaths, newconstr)
-                    """
+        # replace tables
         old_table = new_table
 
     if not silent:

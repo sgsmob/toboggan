@@ -521,6 +521,7 @@ class SolvedConstr:
 
         self.hashvalue = hash(self.path_weights) ^ hash((self.instance.k,
                                                          self.instance.flow))
+        self.rank = self.instance.k
 
     def __repr__(self):
         return "SolvedConstr " + str(self.path_weights)
