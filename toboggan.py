@@ -104,6 +104,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Splice flows into paths')
     parser.add_argument('file', help='a .graph file.'
                         ' Needs a .truth file in the same folder.')
+    parser.add_argument('-p', '--profile',
+                        help="Profile execution", action='store_true')
     parser.add_argument('--indices',
                         help='Either a file containing indices '
                         '(position in .graph file) on which to run, '
@@ -228,11 +230,13 @@ if __name__ == "__main__":
             k_cutset = instance.max_edge_cut_size
 
             # find the optimal solution size
-            prof = cProfile.Profile()
-            prof.enable()
+            if args.profile:
+                prof = cProfile.Profile()
+                prof.enable()
             solution_weights, time_weights = find_opt_size(instance, maxtime)
-            prof.disable()
-            prof.print_stats('tottime')
+            if args.profile:
+                prof.disable()
+                prof.print_stats('tottime')
 
             time_paths = 0
             # recover the paths in an optimal solution
