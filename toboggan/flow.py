@@ -236,45 +236,48 @@ class Constr:
     SOLVED = 3
     POW2 = None
 
-    def __init__(self, instance):
-        self.instance = instance
-        self.known_values = [None] * self.instance.k
+    def __init__(self, instance=None, constraint=None):
+        if constraint is not None:
+            self.instance = constraint.instance
+            self.known_values = copy.copy(constraint.known_values)
+            self.hashvalue = copy.copy(constraint.hashvalue)
+            self.rank = copy.copy(constraint.rank)
+            self.utri = constraint.utri.copy()
+            self.pivot_lookup = copy.copy(constraint.pivot_lookup)
+        else:
+            self.instance = instance
+            self.known_values = [None] * self.instance.k
+            # Make sure the necessary constants exist
+            if self.instance.k not in Constr.ORDER_MATRIX:
+                t = self.instance.k
+                Constr.ORDER_MATRIX[t] = np.eye(t-1, t, dtype=int) - \
+                    np.eye(t-1, t, k=1, dtype=int)
+                Constr.ZERO_VECS[t-1] = np.zeros(t-1, dtype=int)
+                Constr.POW2 = 2**np.arange(64, dtype=np.uint64)
 
-        # Make sure the necessary constants exist
-        if self.instance.k not in Constr.ORDER_MATRIX:
-            t = self.instance.k
-            Constr.ORDER_MATRIX[t] = np.eye(t-1, t, dtype=int) - \
-                np.eye(t-1, t, k=1, dtype=int)
-            Constr.ZERO_VECS[t-1] = np.zeros(t-1, dtype=int)
-            Constr.POW2 = 2**np.arange(64, dtype=np.uint64)
-
-        row = np.array([1] * self.instance.k + [self.instance.flow])
-        # In our application instance.k and instance.flow should always be the
-        # same, but we want to keep things clean.
-        self.hashvalue = hash(row.data.tobytes()) ^ hash((self.instance.k,
-                                                          self.instance.flow))
-        self.rank = 1
-        self.utri = np.zeros((self.instance.k, self.instance.k+1))
-        self.utri[0] = row
-        # pivot_lookup[j] gives the row_index of pivot in column j
-        # This is to avoid having to permute utri to be in RREF
-        self.pivot_lookup = [-1 for j in range(len(row))]
-        self.pivot_lookup[0] = 0
+            row = np.array([1] * self.instance.k + [self.instance.flow])
+            # In our application instance.k and instance.flow should always be
+            # the same, but we want to keep things clean.
+            self.hashvalue = hash(row.data.tobytes()) ^\
+                hash(self.instance.k) ^\
+                hash(self.instance.flow)
+            self.rank = 1
+            self.utri = np.zeros((self.instance.k, self.instance.k+1))
+            self.utri[0] = row
+            # pivot_lookup[j] gives the row_index of pivot in column j
+            # This is to avoid having to permute utri to be in RREF
+            self.pivot_lookup = [-1 for j in range(len(row))]
+            self.pivot_lookup[0] = 0
 
     def __repr__(self):
         return str(self.utri)
 
     def _copy_with_new_row(self, row, reduced_row, pivot_idx):
-        res = Constr(self.instance)
+        res = Constr(constraint=self)
 
         # update hashvalue by new row
-        res.hashvalue = self.hashvalue ^ hash(row.data.tobytes())
-        res.known_values = list(self.known_values)
+        res.hashvalue ^= hash(row.data.tobytes())
         res.rank = self.rank + 1
-
-        # copy the old RREF format
-        res.utri = self.utri.copy()
-        res.pivot_lookup = copy.copy(self.pivot_lookup)
 
         # Ensure res.utri (with row added) is in RREF form.
         # Make sure pivot is a 1
