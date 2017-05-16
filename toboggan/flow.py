@@ -253,8 +253,6 @@ class Constr:
         # same, but we want to keep things clean.
         self.hashvalue = hash(row.data.tobytes()) ^ hash((self.instance.k,
                                                           self.instance.flow))
-        self.A = np.zeros((self.instance.k, self.instance.k+1))
-        self.A[0] = row
         self.rank = 1
         self.utri = np.zeros((self.instance.k, self.instance.k+1))
         self.utri[0] = row
@@ -264,52 +262,10 @@ class Constr:
         self.pivot_lookup[0] = 0
 
     def __repr__(self):
-        return str(self.A)
+        return str(self.utri)
 
     def _copy_with_new_row(self, row, reduced_row, pivot_idx):
         res = Constr(self.instance)
-
-        # Find index to insert that maintains order
-        i = 0
-        fc = self.A.shape[1] - 1  # Column with f-values
-        while self.instance.flow > self.A[i, fc] and self.A[i, fc] > 0:
-            i += 1
-
-        # Tie-break in case flow values are the same
-        # row_repr = np.packbits(row[:-1])
-        bitlen = len(row)-1
-        # Similar to np.packbits, but works for more than 8 paths.
-        row_repr = row[:-1].dot(Constr.POW2[:bitlen])
-        try:
-            while self.instance.flow == self.A[i, fc] and \
-                    row_repr < self.A[i, :-1].dot(Constr.POW2[:bitlen]):
-                i += 1
-        except ValueError as e:
-            print(">>>>>>>>>>>>>")
-            print(row)
-            print(row_repr)
-            print(self.A[i, :-1])
-            print(Constr.POW2[:bitlen])
-            print("<<<<<<<<<<<<<")
-            raise(e)
-        except IndexError as e:
-            print("<<<<<<<<<<<<<")
-            print(row)
-            print(row_repr)
-            print(self.A[:, :-1])
-            print(i)
-            print(Constr.POW2[:bitlen])
-            print(">>>>>>>>>>>>>")
-            # raise(e)
-
-        # copy and update the sorted constraint matrix
-        for j, old_row in enumerate(self.A[:-1, ]):
-            if j < i:
-                res.A[j] = old_row
-            elif j == i:
-                res.A[j] = row
-            else:
-                res.A[j+1] = old_row
 
         # update hashvalue by new row
         res.hashvalue = self.hashvalue ^ hash(row.data.tobytes())
@@ -349,8 +305,8 @@ class Constr:
         t = self.instance.k
         c = np.array([1]*t)  # Optimization not important.
         # Equality constraints: flow values
-        A_eq = self.A[:, :-1]
-        b_eq = self.A[:, -1]
+        A_eq = self.utri[:self.rank, :-1]
+        b_eq = self.utri[:self.rank, -1]
         # Inequality constraints: ensure that weights are sorted
         A_ub = Constr.ORDER_MATRIX[t]
         assert(A_ub.shape == (t-1, t))
@@ -450,7 +406,11 @@ class Constr:
             return False
 
         # Since we keep A sorted the following comparisons work.
-        if not np.array_equal(self.A, other.A):
+        A_pivots = filter(self.pivot_lookup, lambda x: x > -1)
+        B_pivots = filter(other.pivot_lookup, lambda x: x > -1)
+        A = self.utri[A_pivots, :]
+        B = other.utri[B_pivots, :]
+        if not np.array_equal(A, B):
             return False
 
         # This should always be true in our application, added
