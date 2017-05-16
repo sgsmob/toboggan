@@ -1,0 +1,157 @@
+# Timeout is set to 300
+# Recovering paths
+# Running on instances 1940
+# Ground-truth available in file ../research/instances/rnaseq/zebrafish/79.truth
+
+File 79.graph instance 1939 name ENSDARG00000099045 with n = 22, m = 28, and truth = 7:
+0 8 1225
+0 8 2795
+8 10 1932
+8 10 10
+8 15 2078
+10 15 1277
+10 15 665
+15 21 1225
+15 21 882
+15 21 401
+15 21 1512
+# Preprocessing
+#	Graph has an edge cut of size 4.
+#	Investigating cutsets yields bound 5.
+#	User supplied k value of 1.
+#	Continuing using k = 5
+# Reduced instance has n = 5, m = 11, and lower_bound = 5:
+Searching for minimum-sized set of weights, timeout set at 300
+# 	Call guess_weight with k = 5
+Timed out after 300 seconds
+         188717208 function calls (187638725 primitive calls) in 300.000 seconds
+
+   Ordered by: internal time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+  1615435   46.508    0.000  174.838    0.000 linalg.py:1830(lstsq)
+  3230870   45.126    0.000   45.126    0.000 {built-in method numpy.linalg.lapack_lite.dgelsd}
+ 18161454   27.885    0.000   27.885    0.000 {built-in method numpy.core.multiarray.array}
+  1615435   20.007    0.000  294.325    0.000 flow.py:345(add_constraint)
+  1615435   12.110    0.000  221.449    0.000 flow.py:298(_test_row)
+  4811436   11.734    0.000   16.181    0.000 defmatrix.py:314(__getitem__)
+   756006   11.411    0.000   19.155    0.000 function_base.py:4740(insert)
+   715112   10.744    0.000   18.966    0.000 linalg.py:296(solve)
+8653633/7586069    8.568    0.000    9.784    0.000 defmatrix.py:292(__array_finalize__)
+  1638250    8.157    0.000    8.157    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+  8077178    7.274    0.000    7.274    0.000 {built-in method numpy.core.multiarray.zeros}
+  3535985    5.911    0.000    5.911    0.000 {method 'astype' of 'numpy.ndarray' objects}
+   756176    5.402    0.000   15.316    0.000 flow.py:239(__init__)
+  3230869    4.744    0.000   11.785    0.000 fromnumeric.py:1364(ravel)
+      170    4.331    0.025  299.994    1.765 dp.py:14(solve)
+ 21639284    4.251    0.000    4.251    0.000 {built-in method builtins.isinstance}
+  1615434    4.127    0.000   13.309    0.000 fromnumeric.py:1710(sum)
+  1067394    4.075    0.000    5.402    0.000 {method 'dot' of 'numpy.ndarray' objects}
+  1615435    3.776    0.000    9.217    0.000 linalg.py:180(_fastCopyAndTranspose)
+  2371611    3.739    0.000    4.298    0.000 {method 'copy' of 'numpy.ndarray' objects}
+  5485548    3.539    0.000    8.894    0.000 numeric.py:463(asarray)
+  3230870    3.527    0.000    3.527    0.000 {built-in method numpy.core.multiarray._fastCopyAndTranspose}
+  4661094    3.467    0.000   11.090    0.000 linalg.py:106(_makearray)
+  3230868    3.343    0.000    3.343    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+  2330547    3.159    0.000    3.836    0.000 linalg.py:139(_commonType)
+  8792287    2.745    0.000    2.745    0.000 {built-in method builtins.min}
+  1615435    2.434    0.000    3.085    0.000 linalg.py:168(_to_native_byte_order)
+  3230868    2.232    0.000    2.702    0.000 numeric.py:534(asanyarray)
+  3230870    2.111    0.000    3.869    0.000 {method 'transpose' of 'numpy.ndarray' objects}
+  1615435    1.447    0.000    1.625    0.000 linalg.py:192(_assertRank2)
+  3945981    1.420    0.000    2.067    0.000 linalg.py:111(isComplexType)
+  3945983    1.398    0.000    1.398    0.000 {built-in method builtins.max}
+  8607075    1.325    0.000    1.325    0.000 {built-in method builtins.issubclass}
+   756176    1.284    0.000    7.266    0.000 defmatrix.py:246(__new__)
+ 13887439    1.266    0.000    1.266    0.000 {built-in method builtins.len}
+   756006    1.050    0.000    1.050    0.000 numeric.py:1490(rollaxis)
+  1026500    0.975    0.000    1.233    0.000 numeric.py:2160(isscalar)
+   756176    0.874    0.000    3.660    0.000 {method 'view' of 'numpy.ndarray' objects}
+   756006    0.830    0.000    0.830    0.000 {built-in method numpy.core.multiarray.empty}
+  4661094    0.825    0.000    0.825    0.000 {built-in method builtins.getattr}
+  1615435    0.808    0.000    0.808    0.000 {built-in method math.log}
+   715112    0.798    0.000    1.254    0.000 linalg.py:209(_assertNdSquareness)
+   756006    0.760    0.000    1.592    0.000 {method '__array_wrap__' of 'numpy.ndarray' objects}
+   715112    0.743    0.000    0.743    0.000 {method 'squeeze' of 'numpy.ndarray' objects}
+  1615434    0.725    0.000    8.802    0.000 _methods.py:31(_sum)
+   715112    0.692    0.000    1.435    0.000 fromnumeric.py:1143(squeeze)
+   715112    0.687    0.000    0.687    0.000 linalg.py:101(get_linalg_error_extobj)
+  1615435    0.665    0.000    1.014    0.000 linalg.py:124(_realType)
+  2350874    0.605    0.000    0.605    0.000 {built-in method builtins.hash}
+   562554    0.598    0.000    0.598    0.000 linalg.py:89(_raise_linalgerror_singular)
+   715112    0.584    0.000    0.643    0.000 linalg.py:198(_assertRankAtLeast2)
+  3275824    0.523    0.000    0.523    0.000 {method 'append' of 'list' objects}
+  3383426    0.350    0.000    0.350    0.000 {method '__array_prepare__' of 'numpy.ndarray' objects}
+  1615435    0.349    0.000    0.349    0.000 {method 'get' of 'dict' objects}
+    53142    0.329    0.000    0.789    0.000 flow.py:555(push)
+  1512182    0.303    0.000    0.303    0.000 {method 'tobytes' of 'memoryview' objects}
+    52301    0.198    0.000    0.259    0.000 flow.py:507(copy)
+   756006    0.167    0.000    0.167    0.000 {method 'item' of 'numpy.ndarray' objects}
+  1615435    0.158    0.000    0.158    0.000 linalg.py:130(_linalgRealType)
+    53142    0.134    0.000    0.200    0.000 flow.py:586(distribute)
+   152558    0.091    0.000    0.091    0.000 {method 'tolist' of 'numpy.ndarray' objects}
+    22816    0.080    0.000    0.284    0.000 numeric.py:2590(array_equal)
+    34200    0.079    0.000    0.092    0.000 flow.py:433(__init__)
+    52640    0.047    0.000    0.047    0.000 flow.py:497(__init__)
+    13378    0.046    0.000    0.075    0.000 flow.py:261(is_redundant)
+    48072    0.043    0.000    0.043    0.000 flow.py:466(add_constraint)
+   380138    0.043    0.000    0.043    0.000 {method 'is_integer' of 'float' objects}
+     9080    0.036    0.000    0.045    0.000 partition.py:17(visit)
+    14116    0.028    0.000    0.034    0.000 flow.py:552(__hash__)
+    22816    0.025    0.000    0.312    0.000 flow.py:404(__eq__)
+    12937    0.024    0.000    0.339    0.000 {method 'add' of 'set' objects}
+    10239    0.022    0.000    0.026    0.000 flow.py:535(__eq__)
+   119398    0.017    0.000    0.017    0.000 {method 'items' of 'dict' objects}
+     4364    0.015    0.000    0.024    0.000 flow.py:443(is_redundant)
+19556/9921    0.013    0.000    0.063    0.000 partition.py:23(f)
+    17742    0.013    0.000    0.025    0.000 {built-in method builtins.all}
+    22816    0.011    0.000    0.099    0.000 {method 'all' of 'numpy.ndarray' objects}
+    13378    0.009    0.000    0.009    0.000 flow.py:264(<listcomp>)
+    22433    0.008    0.000    0.008    0.000 flow.py:265(<genexpr>)
+    22816    0.008    0.000    0.088    0.000 _methods.py:40(_all)
+    13512    0.006    0.000    0.006    0.000 flow.py:446(<genexpr>)
+     9080    0.005    0.000    0.005    0.000 partition.py:18(<listcomp>)
+5809/4525    0.004    0.000    0.023    0.000 partition.py:55(b)
+      594    0.003    0.000    0.003    0.000 guess_weight.py:43(is_feasible)
+      841    0.003    0.000    0.003    0.000 partition.py:15(algorithm_u)
+    12942    0.003    0.000    0.003    0.000 flow.py:424(__hash__)
+        1    0.002    0.002  300.000  300.000 guess_weight.py:62(solve)
+      841    0.002    0.000    0.002    0.000 graphs.py:67(labeled_neighborhood)
+      169    0.000    0.000    0.002    0.000 graphs.py:61(sink)
+      845    0.000    0.000    0.001    0.000 graphs.py:126(out_degree)
+      845    0.000    0.000    0.001    0.000 graphs.py:84(out_neighborhood)
+      946    0.000    0.000    0.000    0.000 {built-in method builtins.sum}
+      845    0.000    0.000    0.000    0.000 graphs.py:78(neighborhood)
+      170    0.000    0.000    0.001    0.000 graphs.py:55(source)
+      339    0.000    0.000    0.000    0.000 graphs.py:52(__iter__)
+      170    0.000    0.000    0.000    0.000 graphs.py:129(in_degree)
+      339    0.000    0.000    0.000    0.000 {built-in method builtins.iter}
+      170    0.000    0.000    0.000    0.000 graphs.py:87(in_neighborhood)
+        1    0.000    0.000  300.000  300.000 toboggan.py:77(find_opt_size)
+      165    0.000    0.000    0.000    0.000 flow.py:490(__hash__)
+        1    0.000    0.000    0.000    0.000 flow.py:211(has_bad_bounds)
+        2    0.000    0.000    0.000    0.000 twodim_base.py:139(eye)
+        3    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+        2    0.000    0.000    0.000    0.000 signal.py:35(_enum_to_int)
+        1    0.000    0.000    0.000    0.000 toboggan.py:39(__enter__)
+        1    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.arange}
+        1    0.000    0.000    0.000    0.000 signal.py:45(signal)
+        3    0.000    0.000    0.000    0.000 {method 'format' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 signal.py:25(_int_to_enum)
+        1    0.000    0.000    0.000    0.000 enum.py:459(__new__)
+        1    0.000    0.000    0.000    0.000 toboggan.py:44(__exit__)
+        1    0.000    0.000    0.000    0.000 {built-in method _signal.signal}
+        2    0.000    0.000    0.000    0.000 {built-in method _signal.alarm}
+        1    0.000    0.000    0.000    0.000 enum.py:215(__call__)
+        6    0.000    0.000    0.000    0.000 guess_weight.py:74(<genexpr>)
+        1    0.000    0.000    0.000    0.000 toboggan.py:36(handle_timeout)
+        1    0.000    0.000    0.000    0.000 toboggan.py:32(__init__)
+       10    0.000    0.000    0.000    0.000 guess_weight.py:82(<lambda>)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+# All_info	n_in	m_in	n_red	m_red	k_gtrue	k_cut	k_impro	k_opt	time_w	time_p
+All_info	22	28	5	11	7	4	5	None	300	0
+weights	
+Finished instance.
+
