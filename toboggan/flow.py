@@ -9,7 +9,7 @@ from collections import defaultdict
 import itertools
 import numpy as np
 from scipy.optimize import linprog
-
+import copy
 # local imports
 from toboggan.graphs import convert_to_top_sorting, compute_cuts,\
                             compute_edge_cuts
@@ -253,7 +253,8 @@ class Constr:
         # same, but we want to keep things clean.
         self.hashvalue = hash(row.data.tobytes()) ^ hash((self.instance.k,
                                                           self.instance.flow))
-        self.A = np.matrix(row)
+        self.A = np.zeros((self.instance.k, self.instance.k+1))
+        self.A[0] = row
         self.rank = 1
         self.utri = [row]
         # pivot_lookup[j] gives the row_index of pivot in column j
@@ -270,7 +271,7 @@ class Constr:
         # Find index to insert that maintains order
         i = 0
         fc = self.A.shape[1] - 1  # Column with f-values
-        while self.instance.flow > self.A[i, fc]:
+        while self.instance.flow > self.A[i, fc] and self.A[i, fc] > 0:
             i += 1
 
         # Tie-break in case flow values are the same
@@ -290,12 +291,33 @@ class Constr:
             print(Constr.POW2[:bitlen])
             print("<<<<<<<<<<<<<")
             raise(e)
+        except IndexError as e:
+            print("<<<<<<<<<<<<<")
+            print(row)
+            print(row_repr)
+            print(self.A[:, :-1])
+            print(i)
+            print(Constr.POW2[:bitlen])
+            print(">>>>>>>>>>>>>")
+            # raise(e)
 
-        res.A = np.insert(self.A, i, row, axis=0)
+        # copy and update the sorted constraint matrix
+        for j, old_row in enumerate(self.A[:-1, ]):
+            if j < i:
+                res.A[j] = old_row
+            elif j == i:
+                res.A[j] = row
+            else:
+                res.A[j+1] = old_row
+
         # update hashvalue by new row
-        res.hashvalue ^= hash(row.data.tobytes())
+        res.hashvalue = self.hashvalue ^ hash(row.data.tobytes())
         res.known_values = list(self.known_values)
         res.rank = self.rank + 1
+
+        # copy the old RREF format
+        res.utri = copy.deepcopy(self.utri)
+        res.pivot_lookup = copy.copy(self.pivot_lookup)
 
         # Ensure res.utri (with row added) is in RREF form.
         pivot_value = reduced_row[pivot_idx]
@@ -304,9 +326,9 @@ class Constr:
         for idx in range(len(res.utri)):
             val = res.utri[idx][pivot_idx]
             if val != 0:
-                res.utri[idx] -= reduced_row*val
+                res.utri[idx] = res.utri[idx] - reduced_row*val
         res.utri.append(reduced_row)
-        res.pivot_lookup[pivot_idx] = res.rank
+        res.pivot_lookup[pivot_idx] = res.rank-1
         return res
 
     def is_redundant(self):
@@ -345,7 +367,7 @@ class Constr:
         return False
 
     def _check_lin_dep(self, input_vector):
-        """Checks if input_vector is in rowspan of A"""
+        """Check if input_vector is in rowspan of A."""
         current_pivot = len(input_vector) + 1
         vector = input_vector.copy()
         for col_idx in range(len(vector)):
@@ -354,7 +376,14 @@ class Constr:
                 # check for pivot above it
                 row_idx = self.pivot_lookup[col_idx]
                 if row_idx != -1:  # if vector entry lies under a pivot, reduce
-                    vector = vector - val * self.utri[row_idx]
+                    try:
+                        vector = vector - val * self.utri[row_idx]
+                    except IndexError:
+                        print(self.utri)
+                        print(col_idx)
+                        print(vector)
+                        print(self.pivot_lookup)
+                        raise
                 elif current_pivot == len(input_vector) + 1:
                     current_pivot = col_idx
 
@@ -436,18 +465,20 @@ class Constr:
         assert(dependence_flag == Constr.VALID)
 
         res = self._copy_with_new_row(row, reduced_row, pivot_idx)
+        # print("self.utri", self.utri)
+        # print(" res.utri", res.utri)
 
         if res.rank == res.instance.k:
             # COMPUTE WEIGHTS
             # weights = np.linalg.solve(M, b).T
-
+            weights = np.array(list(sorted(r[-1] for r in res.utri)))
             weights = weights.astype(float).tolist()
             for i, w in enumerate(weights):
                 if w <= 0 or not w.is_integer():
-                    return Constr.INFEASIBLE, None
+                    return None
                 weights[i] = int(w)
-
-            return SolvedConstr(weights, self.instance)
+            # print("Weights are {}".format(weights))
+            return SolvedConstr(weights, res.instance)
 
         # Keep track of path-weights that are determined already.
         if len(paths) == 1:

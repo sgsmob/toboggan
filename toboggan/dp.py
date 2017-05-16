@@ -32,8 +32,8 @@ def solve(instance, silent=True, guessed_weights=None):
     for index, guess in enumerate(guessed_weights):
         if guess is None:
             continue
-        globalconstr, success = globalconstr.add_constraint([index], (0, guess))
-        if not success:
+        globalconstr = globalconstr.add_constraint([index], (0, guess))
+        if globalconstr is None:
             return set()
 
     # Build first DP table
