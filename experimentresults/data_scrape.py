@@ -9,12 +9,12 @@ Use:
     - the new file will contain a list of instances that timed out
 """
 
-import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib
+# import matplotlib.pyplot as plt
 from collections import Counter
 import argparse
 # This line prevents an error arising when running this via ssh
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 
 
 def main(args):
@@ -103,7 +103,7 @@ def main(args):
             finished_opt.append(int(k_opt[i]))
             finished_times.append(float(time_w[i]) + float(time_p[i]))
             finished_densities.append(float(m_red[i])/float(n_red[i]))
-
+    """
     plt.plot(finished_opt, finished_times, 'ro')
     plt.xlim([-1, 10])
     plt.ylim([-0.5, 5])
@@ -114,6 +114,7 @@ def main(args):
     plt.xlim([-1, 10])
     plt.ylim([-0.5, 5])
     plt.savefig('time_from_density.png')
+    """
 
     # look at average runtime for non-trivial, non-timeouts
     nontt_times = 0.0
@@ -146,12 +147,17 @@ def main(args):
     counter = 0
     for i in range(len(k_opt)):
         if k_opt[i] != k_gtrue[i] and time_out[i] == 0:
-                print("{} -- {} -- {} : {}, {}"
-                      "".format(files[i], instance_num[i],
-                                name[i], k_opt[i], k_gtrue[i]))
-                counter += 1
+            #print("{} -- {} -- {} : {}, {}"
+            #          "".format(files[i], instance_num[i],
+            #                    name[i], k_opt[i], k_gtrue[i]))
+            counter += 1
     print("{} instances where k-optimal < ground-truth".format(counter))
 
+    for i in range(len(k_opt)):
+        if k_opt[i] != k_gtrue[i] and time_out[i] == 0:
+            print("{} -- {} -- {} : {}, {}"
+                  "".format(files[i], instance_num[i],
+                            name[i], k_opt[i], k_gtrue[i]))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
