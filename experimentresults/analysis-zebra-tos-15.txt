@@ -1,0 +1,18 @@
+Total num instances is 522
+401 timed out graphs written to timeouts-zebra-tos-15.txt
+(3) Number of non-trivial, non-timeouts is 121, ave runtime is 11.252027151013209
+(4) Distribution of gaps between lower_bound and k_optimal(gap-size: frequency):
+Counter({0: 60, 1: 49, 2: 12})
+Distribution of gaps between cutset and k_optimal (gap-size: frequency):
+Counter({1: 57, 0: 31, 2: 30, 3: 3})
+(1) Instances where k-optimal != k-groundtruth:
+9 instances where k-optimal < ground-truth
+5.graph -- 6711 -- ENSDARG00000086819 : 6, 7
+77.graph -- 10351 -- ENSDARG00000028148 : 6, 7
+46.graph -- 6665 -- ENSDARG00000086819 : 6, 7
+32.graph -- 6711 -- ENSDARG00000086819 : 6, 7
+26.graph -- 10343 -- ENSDARG00000028148 : 7, 9
+76.graph -- 14211 -- ENSDARG00000029764 : 7, 8
+83.graph -- 10346 -- ENSDARG00000028148 : 6, 8
+20.graph -- 1640 -- ENSDARG00000068457 : 8, 9
+20.graph -- 14211 -- ENSDARG00000029764 : 8, 9
