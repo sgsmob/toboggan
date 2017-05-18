@@ -409,10 +409,10 @@ class Constr:
             return False
 
         # Since we keep A sorted the following comparisons work.
-        A_pivots = filter(self.pivot_lookup, lambda x: x > -1)
-        B_pivots = filter(other.pivot_lookup, lambda x: x > -1)
-        A = self.utri[A_pivots, :]
-        B = other.utri[B_pivots, :]
+        A_pivots = filter(lambda x: x > -1, self.pivot_lookup)
+        B_pivots = filter(lambda x: x > -1, other.pivot_lookup)
+        A = self.utri[list(A_pivots), :]
+        B = other.utri[list(B_pivots), :]
         if not np.array_equal(A, B):
             return False
 
