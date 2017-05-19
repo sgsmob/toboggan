@@ -16,7 +16,7 @@ def iterate_over_directory(input_dir,
             continue
         # open the graph file
         print("Processing file {}".format(f))
-        subprocess.call("python3 ../toboggan.py {}/{} --skip_truth --experiment_info --timeout {} >> {}.txt".format(input_dir, f, timeout, results_file), shell=True)
+        subprocess.call("python3 ../toboggan.py {}/{} --skip_truth --experiment_info --timeout {} >> {}".format(input_dir, f, timeout, results_file), shell=True)
 
 
 def main(args):

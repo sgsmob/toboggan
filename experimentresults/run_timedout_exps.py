@@ -10,19 +10,17 @@ def iterate_over_input_list(input_list,
                             timeout):
     with open(input_list, 'r') as instancelist:
         for line in instancelist:
-            print(line)
+            print(line.strip())
             if line[0] == "#":  # skip that line
                 continue
             parts = line.strip().split()
             if(len(parts) > 0):
                 filename = parts[0]
                 instancenum = parts[1]
-                print(filename)
-                print(instancenum)
                 instancenum = int(instancenum) + 1
 
                 subprocess.call("python3 ../toboggan.py {}/{} --indices {} "
-                    "--skip_truth --experiment_info --timeout {} >> {}.txt"
+                    "--skip_truth --experiment_info --timeout {} >> {}"
                     "".format(input_dir, filename, instancenum, timeout, results_file), shell=True)
 
 
