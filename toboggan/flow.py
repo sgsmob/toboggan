@@ -334,6 +334,8 @@ class Constr:
         """Check if input_vector is in rowspan of A."""
         current_pivot = len(input_vector) + 1
         vector = input_vector.copy()
+        # Iterate over nonzeros in vector and check for pivots in res.utri
+        # to use to reduce vector. If vector contains a pivot, it's lin indep
         for col_idx in range(len(vector)):
             val = vector[col_idx]
             if val != 0:
@@ -351,11 +353,11 @@ class Constr:
                 elif current_pivot == len(input_vector) + 1:
                     current_pivot = col_idx
 
-        if current_pivot < len(vector)-1:
+        if current_pivot < len(vector)-1:  # vector is lin indep
             return Constr.VALID, current_pivot, vector
-        elif current_pivot == len(vector)-1:
+        elif current_pivot == len(vector)-1:  # vector inconsistent wtih utri
             return Constr.INFEASIBLE, None, None
-        else:
+        else:  # vector is lin depend on utri
             return Constr.REDUNDANT, None, None
 
     def add_constraint(self, paths, edge):
@@ -383,19 +385,15 @@ class Constr:
         assert(dependence_flag == Constr.VALID)
 
         res = self._copy_with_new_row(row, reduced_row, pivot_idx)
-        # print("self.utri", self.utri)
-        # print(" res.utri", res.utri)
 
         if res.rank == res.instance.k:
             # COMPUTE WEIGHTS
-            # weights = np.linalg.solve(M, b).T
             weights = np.array(list(sorted(res.utri[:, -1])))
             weights = weights.astype(float).tolist()
             for i, w in enumerate(weights):
                 if w <= 0 or not w.is_integer():
                     return None
                 weights[i] = int(w)
-            # print("Weights are {}".format(weights))
             return SolvedConstr(weights, res.instance)
 
         # Keep track of path-weights that are determined already.
