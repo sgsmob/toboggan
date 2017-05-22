@@ -1,0 +1,204 @@
+# Timeout is set to 30
+# Recovering paths
+# Running on instances 9942
+# No ground-truth available. Guessing parameter.
+
+File 83.graph instance 9941 name ENSDARG00000039966 with n = 34, m = 40, and truth = ?:
+# Preprocessing
+#	Graph has an edge cut of size 3.
+#	Investigating cutsets yields bound 4.
+#	User supplied k value of None.
+#	Continuing using k = 4
+# Reduced instance has n = 6, m = 12, and lower_bound = 4:
+Searching for minimum-sized set of weights, timeout set at 30
+# 	Call guess_weight with k = 4
+GUESS WEIGHTS k=4
+# 	Call guess_weight with k = 5
+GUESS WEIGHTS k=5
+# 	Call guess_weight with k = 6
+GUESS WEIGHTS k=6
+Timed out after 30 seconds
+         24152656 function calls (23969917 primitive calls) in 30.000 seconds
+
+   Ordered by: internal time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     4292    3.075    0.001   24.174    0.006 _linprog.py:212(_solve_simplex)
+   375663    2.572    0.000    6.563    0.000 core.py:2867(__array_finalize__)
+   708774    1.761    0.000    1.761    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+   422056    1.661    0.000    3.567    0.000 core.py:2841(_update_from)
+  3891516    1.579    0.000    1.579    0.000 {built-in method builtins.getattr}
+    46393    1.141    0.000    3.934    0.000 core.py:1112(__call__)
+  1108001    1.065    0.000    1.065    0.000 {built-in method numpy.core.multiarray.array}
+   115599    0.977    0.000    1.093    0.000 flow.py:333(_check_lin_dep)
+802913/659442    0.835    0.000    1.929    0.000 core.py:3267(__setattr__)
+    65489    0.691    0.000    1.137    0.000 flow.py:275(_copy_with_new_row)
+   278585    0.655    0.000    3.335    0.000 core.py:3579(filled)
+    46393    0.644    0.000   13.413    0.000 _linprog.py:173(_pivot_row)
+     4066    0.625    0.000   25.441    0.006 _linprog.py:391(_linprog_simplex)
+   328818    0.609    0.000    0.609    0.000 {built-in method numpy.core.multiarray.copyto}
+   143471    0.576    0.000    1.196    0.000 core.py:3298(__setmask__)
+   115599    0.451    0.000    3.137    0.000 flow.py:363(add_constraint)
+  2063887    0.425    0.000    0.425    0.000 {method 'update' of 'dict' objects}
+    93367    0.419    0.000    0.988    0.000 flow.py:561(push)
+    92786    0.419    0.000    3.279    0.000 core.py:3833(__eq__)
+  2554298    0.413    0.000    0.413    0.000 {built-in method builtins.isinstance}
+    50685    0.395    0.000    7.660    0.000 _linprog.py:137(_pivot_col)
+   459447    0.388    0.000    0.388    0.000 {method 'copy' of 'numpy.ndarray' objects}
+   278585    0.371    0.000    0.957    0.000 core.py:398(_check_fill_value)
+   286942    0.351    0.000    0.487    0.000 core.py:1263(make_mask_descr)
+   143471    0.332    0.000    5.814    0.000 core.py:1764(masked_where)
+   519134    0.330    0.000    0.330    0.000 {built-in method builtins.hasattr}
+   282650    0.309    0.000    5.223    0.000 {method 'view' of 'numpy.ndarray' objects}
+    92787    0.282    0.000    4.700    0.000 core.py:5434(min)
+      221    0.280    0.001   29.991    0.136 dp.py:14(solve)
+   143471    0.266    0.000    1.269    0.000 core.py:1486(make_mask)
+   371371    0.265    0.000    0.265    0.000 core.py:3487(_get_data)
+   208504    0.263    0.000    0.263    0.000 {built-in method numpy.core.multiarray.zeros}
+    46393    0.245    0.000    0.312    0.000 core.py:804(__call__)
+    92787    0.244    0.000    1.890    0.000 {method 'view' of 'numpy.generic' objects}
+    92639    0.238    0.000    0.305    0.000 flow.py:513(copy)
+    97078    0.212    0.000    0.757    0.000 core.py:4229(count)
+   426122    0.210    0.000    1.291    0.000 {method 'any' of 'numpy.ndarray' objects}
+    92787    0.192    0.000    0.316    0.000 numerictypes.py:603(obj2sctype)
+    92786    0.186    0.000    0.447    0.000 numeric.py:2576(seterr)
+   282650    0.180    0.000    1.503    0.000 core.py:559(filled)
+    92786    0.174    0.000    0.185    0.000 numeric.py:2676(geterr)
+   261956    0.157    0.000    0.212    0.000 copy.py:66(copy)
+    65710    0.149    0.000    0.418    0.000 flow.py:239(__init__)
+    46393    0.148    0.000    0.211    0.000 core.py:605(get_masked_subclass)
+    93367    0.143    0.000    0.263    0.000 flow.py:592(distribute)
+    92786    0.136    0.000    1.432    0.000 core.py:6950(where)
+   426122    0.131    0.000    1.081    0.000 _methods.py:37(_any)
+    88048    0.131    0.000    0.206    0.000 shape_base.py:61(atleast_2d)
+   185573    0.126    0.000    0.126    0.000 {built-in method builtins.issubclass}
+    97078    0.126    0.000    0.509    0.000 fromnumeric.py:1743(sum)
+   143471    0.107    0.000    0.474    0.000 core.py:1581(make_mask_none)
+    88048    0.106    0.000    0.106    0.000 {built-in method numpy.core.multiarray.concatenate}
+    92787    0.103    0.000    0.516    0.000 core.py:237(_recursive_extremum_fill_value)
+  1107155    0.097    0.000    0.097    0.000 {built-in method builtins.len}
+    92787    0.097    0.000    0.413    0.000 numerictypes.py:774(__getitem__)
+    46393    0.091    0.000    4.053    0.000 core.py:3963(__truediv__)
+    92786    0.091    0.000    0.091    0.000 {method 'nonzero' of 'numpy.ndarray' objects}
+    92787    0.088    0.000    0.368    0.000 {method 'all' of 'numpy.ndarray' objects}
+    29408    0.086    0.000    0.086    0.000 {built-in method builtins.sorted}
+    92787    0.084    0.000    0.347    0.000 {method 'min' of 'numpy.ndarray' objects}
+   286942    0.083    0.000    0.083    0.000 core.py:1242(_recursive_make_descr)
+    92787    0.075    0.000    0.612    0.000 core.py:248(minimum_fill_value)
+    46393    0.060    0.000    0.060    0.000 {built-in method numpy.core.multiarray.can_cast}
+    20390    0.058    0.000    0.076    0.000 partition.py:17(visit)
+   308350    0.057    0.000    0.057    0.000 {method 'get' of 'dict' objects}
+    46393    0.054    0.000    0.323    0.000 numeric.py:2967(__enter__)
+    92786    0.052    0.000    0.052    0.000 {built-in method numpy.core.umath.seterrobj}
+    46393    0.048    0.000    0.226    0.000 numeric.py:2972(__exit__)
+    93080    0.048    0.000    0.048    0.000 flow.py:503(__init__)
+    46393    0.048    0.000    0.060    0.000 numeric.py:2963(__init__)
+    92787    0.047    0.000    0.415    0.000 core.py:1753(_check_mask_axis)
+    92786    0.046    0.000    0.103    0.000 core.py:632(getdata)
+     4725    0.042    0.000   25.529    0.005 flow.py:298(is_redundant)
+    46393    0.038    0.000    0.038    0.000 core.py:619(<listcomp>)
+    44024    0.037    0.000    0.339    0.000 shape_base.py:180(vstack)
+    97078    0.036    0.000    0.036    0.000 fromnumeric.py:2659(size)
+    92787    0.035    0.000    0.280    0.000 _methods.py:40(_all)
+   185572    0.035    0.000    0.035    0.000 {built-in method numpy.core.umath.geterrobj}
+    66590    0.034    0.000    0.034    0.000 flow.py:472(add_constraint)
+   113342    0.034    0.000    0.080    0.000 numeric.py:414(asarray)
+    97078    0.034    0.000    0.369    0.000 _methods.py:31(_sum)
+    92787    0.033    0.000    0.264    0.000 _methods.py:28(_amin)
+    44024    0.032    0.000    0.238    0.000 shape_base.py:230(<listcomp>)
+    92786    0.029    0.000    0.045    0.000 core.py:1299(getmask)
+52198/21118    0.028    0.000    0.118    0.000 partition.py:23(f)
+   100246    0.023    0.000    0.054    0.000 numeric.py:484(asanyarray)
+     4066    0.022    0.000   25.464    0.006 _linprog.py:824(linprog)
+    80991    0.021    0.000    0.021    0.000 {built-in method builtins.hash}
+    46393    0.021    0.000    0.027    0.000 core.py:3823(_delegate_binop)
+    29408    0.021    0.000    0.021    0.000 {method 'astype' of 'numpy.ndarray' objects}
+   202960    0.020    0.000    0.020    0.000 {method 'append' of 'list' objects}
+   188800    0.020    0.000    0.020    0.000 {method 'items' of 'dict' objects}
+    92786    0.019    0.000    0.019    0.000 {method 'count' of 'tuple' objects}
+     4066    0.015    0.000    0.015    0.000 index_tricks.py:665(fill_diagonal)
+     8643    0.015    0.000    0.015    0.000 {built-in method builtins.max}
+22028/13840    0.014    0.000    0.061    0.000 partition.py:55(b)
+    65710    0.014    0.000    0.014    0.000 {method 'tobytes' of 'memoryview' objects}
+   130978    0.013    0.000    0.013    0.000 copy.py:111(_copy_immutable)
+     6210    0.012    0.000    0.014    0.000 flow.py:438(__init__)
+    46393    0.012    0.000    0.012    0.000 {method 'pop' of 'dict' objects}
+    29408    0.011    0.000    0.011    0.000 {method 'tolist' of 'numpy.ndarray' objects}
+     8132    0.009    0.000    0.025    0.000 fromnumeric.py:1383(ravel)
+     8132    0.008    0.000    0.008    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+    20390    0.008    0.000    0.008    0.000 partition.py:18(<listcomp>)
+     4292    0.006    0.000    0.006    0.000 {built-in method numpy.core.multiarray.empty}
+     5513    0.005    0.000    0.010    0.000 {built-in method builtins.all}
+     1362    0.005    0.000    0.006    0.000 guess_weight.py:43(is_feasible)
+     4066    0.005    0.000    0.019    0.000 numeric.py:148(ones)
+     4066    0.004    0.000    0.031    0.000 fromnumeric.py:1892(any)
+    10896    0.004    0.000    0.004    0.000 flow.py:302(<genexpr>)
+     2419    0.004    0.000    0.004    0.000 flow.py:558(__hash__)
+      226    0.004    0.000    0.004    0.000 function_base.py:4121(delete)
+    34234    0.004    0.000    0.004    0.000 {method 'is_integer' of 'float' objects}
+     4065    0.003    0.000    0.003    0.000 optimize.py:112(__getattr__)
+     4066    0.003    0.000    0.003    0.000 {built-in method numpy.core.multiarray.count_nonzero}
+     4725    0.003    0.000    0.003    0.000 flow.py:301(<listcomp>)
+        3    0.003    0.001   30.000   10.000 guess_weight.py:62(solve)
+      788    0.002    0.000    0.005    0.000 flow.py:449(is_redundant)
+      728    0.002    0.000    0.002    0.000 graphs.py:67(labeled_neighborhood)
+      728    0.002    0.000    0.002    0.000 partition.py:15(algorithm_u)
+     4065    0.002    0.000    0.002    0.000 {built-in method builtins.abs}
+      226    0.002    0.000    0.008    0.000 core.py:2707(__new__)
+      625    0.002    0.000    0.002    0.000 flow.py:541(__eq__)
+     4066    0.002    0.000    0.002    0.000 {method 'lower' of 'str' objects}
+      226    0.001    0.000    0.001    0.000 _linprog.py:325(<listcomp>)
+     4304    0.001    0.000    0.001    0.000 flow.py:452(<genexpr>)
+     4066    0.001    0.000    0.001    0.000 optimize.py:137(_check_unknown_options)
+     1250    0.001    0.000    0.001    0.000 {method 'add' of 'set' objects}
+      226    0.001    0.000    0.009    0.000 core.py:6133(array)
+      222    0.001    0.000    0.003    0.000 graphs.py:61(sink)
+     1332    0.001    0.000    0.002    0.000 graphs.py:126(out_degree)
+     1344    0.000    0.000    0.000    0.000 graphs.py:78(neighborhood)
+     1332    0.000    0.000    0.001    0.000 graphs.py:84(out_neighborhood)
+     1727    0.000    0.000    0.000    0.000 {built-in method builtins.sum}
+      223    0.000    0.000    0.001    0.000 graphs.py:55(source)
+      447    0.000    0.000    0.000    0.000 graphs.py:52(__iter__)
+      223    0.000    0.000    0.000    0.000 graphs.py:129(in_degree)
+      226    0.000    0.000    0.000    0.000 {method 'indices' of 'slice' objects}
+      909    0.000    0.000    0.000    0.000 flow.py:496(__hash__)
+      562    0.000    0.000    0.000    0.000 flow.py:429(__hash__)
+      226    0.000    0.000    0.000    0.000 index_tricks.py:650(__getitem__)
+      226    0.000    0.000    0.000    0.000 core.py:3509(get_fill_value)
+      223    0.000    0.000    0.000    0.000 graphs.py:87(in_neighborhood)
+      221    0.000    0.000    0.000    0.000 flow.py:269(<listcomp>)
+      447    0.000    0.000    0.000    0.000 {built-in method builtins.iter}
+      104    0.000    0.000    0.000    0.000 flow.py:482(__eq__)
+        8    0.000    0.000    0.000    0.000 _linprog.py:327(<listcomp>)
+        2    0.000    0.000    0.000    0.000 flow.py:60(_compute_max_weight_bounds)
+        1    0.000    0.000   30.000   30.000 toboggan.py:77(find_opt_size)
+        3    0.000    0.000    0.000    0.000 flow.py:211(has_bad_bounds)
+        2    0.000    0.000    0.000    0.000 flow.py:81(_compute_weight_bounds)
+        4    0.000    0.000    0.000    0.000 twodim_base.py:192(eye)
+        8    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.arange}
+        8    0.000    0.000    0.000    0.000 {method 'format' of 'str' objects}
+        2    0.000    0.000    0.000    0.000 flow.py:198(try_larger_k)
+        2    0.000    0.000    0.000    0.000 signal.py:35(_enum_to_int)
+       14    0.000    0.000    0.000    0.000 guess_weight.py:75(<genexpr>)
+        2    0.000    0.000    0.000    0.000 {built-in method _signal.alarm}
+       22    0.000    0.000    0.000    0.000 guess_weight.py:83(<lambda>)
+        1    0.000    0.000    0.000    0.000 signal.py:45(signal)
+        1    0.000    0.000    0.000    0.000 toboggan.py:39(__enter__)
+        2    0.000    0.000    0.000    0.000 flow.py:72(<dictcomp>)
+        1    0.000    0.000    0.000    0.000 enum.py:265(__call__)
+       26    0.000    0.000    0.000    0.000 {built-in method builtins.min}
+        1    0.000    0.000    0.000    0.000 {built-in method _signal.signal}
+        1    0.000    0.000    0.000    0.000 toboggan.py:36(handle_timeout)
+        1    0.000    0.000    0.000    0.000 toboggan.py:44(__exit__)
+        1    0.000    0.000    0.000    0.000 getlimits.py:94(__new__)
+        1    0.000    0.000    0.000    0.000 signal.py:25(_int_to_enum)
+        1    0.000    0.000    0.000    0.000 toboggan.py:32(__init__)
+        2    0.000    0.000    0.000    0.000 flow.py:97(<listcomp>)
+        2    0.000    0.000    0.000    0.000 flow.py:101(<listcomp>)
+        1    0.000    0.000    0.000    0.000 enum.py:515(__new__)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Finished instance.
+
