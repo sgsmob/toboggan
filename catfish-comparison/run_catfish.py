@@ -11,7 +11,8 @@ def iterate_over_instances(graph_file,
                            truth_lookup,
                            results_file,
                            graphs_dir,
-                           path_to_catfish):
+                           path_to_catfish,
+                           recording_log_file):
     """
     Iterate over the graph file and run on each instance
     """
@@ -41,11 +42,12 @@ def iterate_over_instances(graph_file,
                                  graphs_dir)
                 os.remove(tmp_file_name)
                 os.remove(tmp_truth_file_name)
-                print("{}\t{}\t{}\t{}\t{}".format(graph_file_name,
-                                                  instance_name,
-                                                  true_num_paths,
-                                                  num_paths,
-                                                  cattime))
+                log_line = "{}\t{}\t{}\t{}\t{}".format(graph_file_name,
+                                                       instance_name,
+                                                       true_num_paths,
+                                                       num_paths,
+                                                       cattime)
+                recording_log_file.write(log_line)
             # figure out the name of the instance
             instance_name = line.strip().split()[-1]
             # count the number of paths in the corresponding segment of the
@@ -89,11 +91,12 @@ def iterate_over_instances(graph_file,
     starttime = time.time()
     num_paths = run_single_instance(tmp_file_name, path_to_catfish)
     cattime = time.time() - starttime
-    print("{}\t{}\t{}\t{}\t{}".format(graph_file_name,
-                                      instance_name,
-                                      true_num_paths,
-                                      num_paths,
-                                      cattime))
+    log_line = "{}\t{}\t{}\t{}\t{}".format(graph_file_name,
+                                           instance_name,
+                                           true_num_paths,
+                                           num_paths,
+                                           cattime)
+    recording_log_file.write(log_line)
     # check if we got the optimal number of paths
     check_if_optimal(num_paths,
                      true_num_paths,
@@ -111,7 +114,7 @@ def run_single_instance(input_file_name, path_to_catfish):
     """
     Run Catfish on a single instance and return the number of paths used
     """
-    
+
     output_file_name = os.path.join(os.getcwd(), "output.out")
     """
     args = [path_to_catfish, "-i", input_file_name, "-o", output_file_name]
@@ -194,7 +197,8 @@ def check_if_optimal(num_paths,
 def iterate_over_directory(input_dir,
                            results_file,
                            graphs_dir,
-                           path_to_catfish):
+                           path_to_catfish,
+                           recording_log_file):
     # get all the files in the directory
     files = os.listdir(input_dir)
     for f in files:
@@ -212,7 +216,8 @@ def iterate_over_directory(input_dir,
         # loop through all the instances in the opened files
         truth_file = open(os.path.join(input_dir, name+".truth"), 'r')
         iterate_over_instances(graph_file, truth_file, name, truth_lookup,
-                               results_file, graphs_dir, path_to_catfish)
+                               results_file, graphs_dir, path_to_catfish,
+                               recording_log_file)
         graph_file.close()
         truth_file.close()
 
@@ -222,9 +227,11 @@ def main(args):
     results_file = open(args.results_file_name, 'w')
     graphs_dir = args.graphs_dir
     path_to_catfish = args.catfish
+    recording_log_file = open(args.recording_log_name, 'w')
     iterate_over_directory(input_dir, results_file, graphs_dir,
-                           path_to_catfish)
+                           path_to_catfish, recording_log_file)
     results_file.close()
+    recording_log_file.close()
 
 
 if __name__ == "__main__":
@@ -239,6 +246,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--catfish", nargs="?", default="/home/kakloste/"
                         "toboggan/catfish/src/src/catfish", help="full path to"
                         " catfish executable", type=str)
-
+    parser.add_argument("recording_log_name", help="name of file to store notes"
+                        " of timing etc", type=str)
     args = parser.parse_args()
     main(args)
