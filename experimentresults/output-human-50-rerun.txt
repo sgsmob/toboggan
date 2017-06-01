@@ -1,0 +1,105 @@
+# Timeout is set to 50
+# Recovering paths
+# Running on instances 376
+# Ground-truth available in file /home/kakloste/research/instances/rnaseq/human/30.truth
+
+File 30.graph instance 375 name ENSG00000211452 with n = 16, m = 25, and truth = 7:
+# Preprocessing
+#	Graph has an edge cut of size 4.
+#	Investigating cutsets yields bound 5.
+#	User supplied k value of 1.
+#	Continuing using k = 5
+# Reduced instance has n = 6, m = 15, and lower_bound = 5:
+Searching for minimum-sized set of weights, timeout set at 50
+# 	Call guess_weight with k = 5
+# 	Call guess_weight with k = 6
+Timed out after 50 seconds
+# All_info	n_in	m_in	n_red	m_red	k_gtrue	k_cut	k_impro	k_opt	time_w	time_p
+All_info	16	25	6	15	7	4	5	None	50	0
+weights	
+Finished instance.
+
+# Timeout is set to 50
+# Recovering paths
+# Running on instances 5354
+# Ground-truth available in file /home/kakloste/research/instances/rnaseq/human/40.truth
+
+File 40.graph instance 5353 name ENSG00000066827 with n = 27, m = 36, and truth = 7:
+# Preprocessing
+#	Graph has an edge cut of size 4.
+#	Investigating cutsets yields bound 6.
+#	User supplied k value of 1.
+#	Continuing using k = 6
+# Reduced instance has n = 7, m = 16, and lower_bound = 6:
+Searching for minimum-sized set of weights, timeout set at 50
+# 	Call guess_weight with k = 6
+Timed out after 50 seconds
+# All_info	n_in	m_in	n_red	m_red	k_gtrue	k_cut	k_impro	k_opt	time_w	time_p
+All_info	27	36	7	16	7	4	6	None	50	0
+weights	
+Finished instance.
+
+# Timeout is set to 50
+# Recovering paths
+# Running on instances 9636
+# Ground-truth available in file /home/kakloste/research/instances/rnaseq/human/23.truth
+
+File 23.graph instance 9635 name ENSG00000006283 with n = 47, m = 57, and truth = 7:
+# Preprocessing
+#	Graph has an edge cut of size 4.
+#	Investigating cutsets yields bound 5.
+#	User supplied k value of 1.
+#	Continuing using k = 5
+# Reduced instance has n = 7, m = 17, and lower_bound = 5:
+Searching for minimum-sized set of weights, timeout set at 50
+# 	Call guess_weight with k = 5
+# 	Call guess_weight with k = 6
+Timed out after 50 seconds
+# All_info	n_in	m_in	n_red	m_red	k_gtrue	k_cut	k_impro	k_opt	time_w	time_p
+All_info	47	57	7	17	7	4	5	None	50	0
+weights	
+Finished instance.
+
+# Timeout is set to 50
+# Recovering paths
+# Running on instances 8101
+# Ground-truth available in file /home/kakloste/research/instances/rnaseq/human/36.truth
+
+File 36.graph instance 8100 name ENSG00000066427 with n = 20, m = 30, and truth = 7:
+# Preprocessing
+#	Graph has an edge cut of size 4.
+#	Investigating cutsets yields bound 5.
+#	User supplied k value of 1.
+#	Continuing using k = 5
+# Reduced instance has n = 8, m = 18, and lower_bound = 5:
+Searching for minimum-sized set of weights, timeout set at 50
+# 	Call guess_weight with k = 5
+# 	Call guess_weight with k = 6
+Timed out after 50 seconds
+# All_info	n_in	m_in	n_red	m_red	k_gtrue	k_cut	k_impro	k_opt	time_w	time_p
+All_info	20	30	8	18	7	4	5	None	50	0
+weights	
+Finished instance.
+
+# Timeout is set to 50
+# Recovering paths
+# Running on instances 3961
+# Ground-truth available in file /home/kakloste/research/instances/rnaseq/human/9.truth
+
+File 9.graph instance 3960 name ENSG00000118513 with n = 28, m = 37, and truth = 7:
+# Preprocessing
+#	Graph has an edge cut of size 4.
+#	Investigating cutsets yields bound 4.
+#	User supplied k value of 1.
+#	Continuing using k = 4
+# Reduced instance has n = 6, m = 15, and lower_bound = 4:
+Searching for minimum-sized set of weights, timeout set at 50
+# 	Call guess_weight with k = 4
+# 	Call guess_weight with k = 5
+# 	Call guess_weight with k = 6
+Timed out after 50 seconds
+# All_info	n_in	m_in	n_red	m_red	k_gtrue	k_cut	k_impro	k_opt	time_w	time_p
+All_info	28	37	6	15	7	4	4	None	50	0
+weights	
+Finished instance.
+
