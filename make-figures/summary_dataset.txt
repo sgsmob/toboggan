@@ -1,46 +1,45 @@
 ==================================================
 human
 =====
-human has total instances                 1169083
+human has total instances                 1169082
 
 cutset / lowerbound facts
 	k_groundtruth = max_cutset_size on        1157396
-	                           (all but         11687)
+	                           (all but         11686)
 	k_groundtruth = improved_bound on         1164398
-	                           (all but          4685)
+	                           (all but          4684)
 
 k_gt / k_opt facts
-	toboggan has finished on                  1166609
+	toboggan has finished on                  1166604
 	of those, k_groundtruth > k_opt on:           431
 	                  trivial instances            90
 	               nontrivial instances           341
 	average k_gt                                 5.44
 	average k_opt                                4.38
-
-
-
+    
+    
+    
 ==================================================
 mouse
 =====
-mouse has total instances                 1316058
+mouse has total instances                 1316056
 
 cutset / lowerbound facts
 	k_groundtruth = max_cutset_size on        1302242
-	                           (all but         13816)
-	k_groundtruth = improved_bound on         1309881
-	                           (all but          6177)
+	                           (all but         13814)
+	k_groundtruth = improved_bound on         1309882
+	                           (all but          6174)
 
 k_gt / k_opt facts
-	toboggan has finished on                  1313571
-	of those, k_groundtruth > k_opt on:           875
+	toboggan has finished on                  1313569
+	of those, k_groundtruth > k_opt on:           873
 	                  trivial instances           170
-	               nontrivial instances           705
-	average k_gt                                 5.00
-	average k_opt                                3.96
+	               nontrivial instances           703
+	average k_gt                                 4.99
+	average k_opt                                3.95
 
 
-    
-    
+
 ==================================================
 zebra
 =====

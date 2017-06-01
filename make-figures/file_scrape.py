@@ -36,6 +36,7 @@ def main(args):
     weights = []
 
     time_flag = 0
+    timeout_limits = []
 
     with open(datafile, 'r') as reader:
         content = reader.readlines()
@@ -52,6 +53,10 @@ def main(args):
                         files.append(tmp_file)
                         instance_num.append(tmp_inst)
                         name.append(tmp_name)
+                        timeout_limits.append(-1)
+                        tmp_timeout_limit = -1
+                    if(parts[0] == 'Searching'):
+                        tmp_timeout_limit = parts[-1]
                     if(parts[0] == 'Timed'):
                         timed_out_graphs.append((tmp_file, tmp_inst, tmp_name))
                         time_flag = 1
@@ -69,6 +74,7 @@ def main(args):
                     if(parts[0] == 'Finished'):
                         time_out.append(time_flag)
                         time_flag = 0
+                        timeout_limits[-1] = tmp_timeout_limit
     for j in range(len(n_in)):
         # print("# fname\t inst\t n\t m\t n_red\t m_red\t k_GT\t k_opt\t cut_bd\t impr_bd\t time_w\t time_p\t time_out")
         tmp_file = files[j]
@@ -84,10 +90,11 @@ def main(args):
         time_wj = float(time_w[j])
         time_pj = float(time_p[j])
         time_outj = time_out[j]
+        timeout_val = timeout_limits[j]
 
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.10f}\t{:.10f}\t{}".format(
+        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.10f}\t{:.10f}\t{}\t{}".format(
                tmp_file, tmp_inst, n_inj, m_inj, n_redj, m_redj, k_gtruej, k_optj,
-                k_cutsetj, k_improvedj, time_wj, time_pj, time_outj))
+                k_cutsetj, k_improvedj, time_wj, time_pj, time_outj, timeout_val))
 
 
 if __name__ == "__main__":
