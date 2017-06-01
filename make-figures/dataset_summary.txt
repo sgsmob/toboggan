@@ -1,0 +1,61 @@
+==================================================
+human
+=====
+human has total instances                 1169083
+
+cutset / lowerbound facts
+	k_groundtruth = max_cutset_size on        1157396
+	                           (all but         11687)
+	k_groundtruth = improved_bound on         1164398
+	                           (all but          4685)
+
+k_gt / k_opt facts
+	toboggan has finished on                  1166609
+	of those, k_groundtruth > k_opt on:           431
+	                  trivial instances            90
+	               nontrivial instances           341
+	average k_gt                                 5.44
+	average k_opt                                4.38
+
+
+
+==================================================
+mouse
+=====
+mouse has total instances                 1316058
+
+cutset / lowerbound facts
+	k_groundtruth = max_cutset_size on        1302242
+	                           (all but         13816)
+	k_groundtruth = improved_bound on         1309881
+	                           (all but          6177)
+
+k_gt / k_opt facts
+	toboggan has finished on                  1313571
+	of those, k_groundtruth > k_opt on:           875
+	                  trivial instances           170
+	               nontrivial instances           705
+	average k_gt                                 5.00
+	average k_opt                                3.96
+
+
+    
+    
+==================================================
+zebra
+=====
+zebra has total instances                 1549373
+
+cutset / lowerbound facts
+	k_groundtruth = max_cutset_size on        1540685
+	                           (all but          8688)
+	k_groundtruth = improved_bound on         1546699
+	                           (all but          2674)
+
+k_gt / k_opt facts
+	toboggan has finished on                  1549195
+	of those, k_groundtruth > k_opt on:           455
+	                  trivial instances            53
+	               nontrivial instances           402
+	average k_gt                                 5.21
+	average k_opt                                4.13

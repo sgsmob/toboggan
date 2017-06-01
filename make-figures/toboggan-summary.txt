@@ -1,0 +1,28 @@
+zebra has 
+	total   instances:      1549373
+	trivial instances:      1103493
+	nontriv instances:       445880
+
+toboggan with 400s timeout has
+	timeout instances:          209
+	success instances:       445671
+
+
+human has 
+	total   instances:      1169083
+	trivial instances:       639560
+	nontriv instances:       529523
+
+toboggan with 50s timeout has
+	timeout instances:         2474
+	success instances:       527044
+
+
+mouse has 
+	total   instances:      1316058
+	trivial instances:       842873
+	nontriv instances:       473185
+
+toboggan with 50s timeout has
+	timeout instances:         2487
+	success instances:       470696
