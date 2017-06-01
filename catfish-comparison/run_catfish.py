@@ -23,7 +23,6 @@ def iterate_over_instances(graph_file,
     for line in graph_file:
         if line[0] == "#":  # we've reached a new instance
             # clean up when not first iteration
-            cattime = 0
             if tmp_file is not None:
                 tmp_file.close()
                 tmp_truth_file.close()
@@ -42,16 +41,16 @@ def iterate_over_instances(graph_file,
                                  graphs_dir)
                 os.remove(tmp_file_name)
                 os.remove(tmp_truth_file_name)
+                print("{}\t{}\t{}\t{}\t{}".format(graph_file_name,
+                                                  instance_name,
+                                                  true_num_paths,
+                                                  num_paths,
+                                                  cattime))
             # figure out the name of the instance
             instance_name = line.strip().split()[-1]
             # count the number of paths in the corresponding segment of the
             # truth file
             true_num_paths = truth_lookup[instance_name]
-            print("{}\t{}\t{}\t{}\t{}".format(graph_file_name,
-                                              instance_name,
-                                              true_num_paths,
-                                              num_paths,
-                                              cattime))
             # make a temporary file for the input
             tmp_string = 'temp_working_file'
             tmp_file_name = tmp_string+".sgr"
@@ -87,7 +86,14 @@ def iterate_over_instances(graph_file,
     tmp_truth_file.close()
 
     # run catfish on that instance
+    starttime = time.time()
     num_paths = run_single_instance(tmp_file_name, path_to_catfish)
+    cattime = time.time() - starttime
+    print("{}\t{}\t{}\t{}\t{}".format(graph_file_name,
+                                      instance_name,
+                                      true_num_paths,
+                                      num_paths,
+                                      cattime))
     # check if we got the optimal number of paths
     check_if_optimal(num_paths,
                      true_num_paths,
@@ -105,10 +111,15 @@ def run_single_instance(input_file_name, path_to_catfish):
     """
     Run Catfish on a single instance and return the number of paths used
     """
+    
     output_file_name = os.path.join(os.getcwd(), "output.out")
+    """
     args = [path_to_catfish, "-i", input_file_name, "-o", output_file_name]
     proc = sp.Popen(args, stdout=sp.PIPE)
     stdout, stderr = proc.communicate()
+    """
+    sp.call("{} -i {} -o {}".format(path_to_catfish, input_file_name,
+                                 output_file_name), shell=True)
     # print "Output:"
     # print stdout
     # print "Errors:"
