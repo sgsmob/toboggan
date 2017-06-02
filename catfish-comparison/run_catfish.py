@@ -42,7 +42,7 @@ def iterate_over_instances(graph_file,
                                  graphs_dir)
                 os.remove(tmp_file_name)
                 os.remove(tmp_truth_file_name)
-                log_line = "{}\t{}\t{}\t{}\t{}".format(graph_file_name,
+                log_line = "{}\t{}\t{}\t{}\t{}\n".format(graph_file_name,
                                                        instance_name,
                                                        true_num_paths,
                                                        num_paths,
@@ -91,7 +91,7 @@ def iterate_over_instances(graph_file,
     starttime = time.time()
     num_paths = run_single_instance(tmp_file_name, path_to_catfish)
     cattime = time.time() - starttime
-    log_line = "{}\t{}\t{}\t{}\t{}".format(graph_file_name,
+    log_line = "{}\t{}\t{}\t{}\t{}\n".format(graph_file_name,
                                            instance_name,
                                            true_num_paths,
                                            num_paths,
