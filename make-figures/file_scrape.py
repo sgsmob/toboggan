@@ -79,6 +79,7 @@ def main(args):
         # print("# fname\t inst\t n\t m\t n_red\t m_red\t k_GT\t k_opt\t cut_bd\t impr_bd\t time_w\t time_p\t time_out")
         tmp_file = files[j]
         tmp_inst = instance_num[j]
+        namej = name[j]
         n_inj = n_in[j]
         m_inj = m_in[j]
         n_redj = n_red[j]
@@ -92,9 +93,9 @@ def main(args):
         time_outj = time_out[j]
         timeout_val = timeout_limits[j]
 
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.10f}\t{:.10f}\t{}\t{}".format(
+        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.10f}\t{:.10f}\t{}\t{}\t{}".format(
                tmp_file, tmp_inst, n_inj, m_inj, n_redj, m_redj, k_gtruej, k_optj,
-                k_cutsetj, k_improvedj, time_wj, time_pj, time_outj, timeout_val))
+                k_cutsetj, k_improvedj, time_wj, time_pj, time_outj, timeout_val, namej))
 
 
 if __name__ == "__main__":

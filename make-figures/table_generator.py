@@ -1,6 +1,25 @@
 # FILTER DATA
 import collections
 
+def get_catfish_tables(directory, inputfile):
+    datamatrix = []
+    datadict = collections.defaultdict(lambda:-1)
+    idx = 0
+    with open(directory + inputfile, 'r') as datafile:
+        for line in datafile:
+            temp_line = line.strip().split()
+            key = temp_line[0] + ' ' + temp_line[1]
+            row = temp_line[2::]
+            if datadict[key] == -1:  # nothing present, so add the row
+                datamatrix.append(row)
+                datadict[key] = idx
+                idx +=1
+            else:
+                datamatrix[datadict[key]] = row
+                    
+    return datadict, datamatrix
+
+
 def make_tables(inputfile):
     """
     datamatrix -- list of arrays; each array contains info for a single graph instance:
@@ -106,3 +125,14 @@ def get_toboggan_timing_info(datadict, datamatrix):
             'num_timedout':num_timedout,
             'time_totals':time_totals,
             'total_num':total_num}
+
+def get_catfish_timing_info(datadict, datamatrix):
+    time_totals = []
+    total_num = len(datamatrix)
+    for key, val in datadict.items():
+        row = datamatrix[val]
+        """
+        datamatrix[j] = [ k_gt, k_catfish, time ]
+        """
+        time_totals.append(float(row[2]))
+    return time_totals

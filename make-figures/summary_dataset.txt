@@ -1,16 +1,16 @@
 ==================================================
 human
 =====
-human has total instances                 1169082
+human has total instances                 1169083
 
 cutset / lowerbound facts
 	k_groundtruth = max_cutset_size on        1157396
-	                           (all but         11686)
+	                           (all but         11687)
 	k_groundtruth = improved_bound on         1164398
-	                           (all but          4684)
+	                           (all but          4685)
 
 k_gt / k_opt facts
-	toboggan has finished on                  1166604
+	toboggan has finished on                  1166605
 	of those, k_groundtruth > k_opt on:           431
 	                  trivial instances            90
 	               nontrivial instances           341
@@ -22,19 +22,19 @@ k_gt / k_opt facts
 ==================================================
 mouse
 =====
-mouse has total instances                 1316056
+mouse has total instances                 1316058
 
 cutset / lowerbound facts
 	k_groundtruth = max_cutset_size on        1302242
-	                           (all but         13814)
+	                           (all but         13816)
 	k_groundtruth = improved_bound on         1309882
-	                           (all but          6174)
+	                           (all but          6176)
 
 k_gt / k_opt facts
-	toboggan has finished on                  1313569
-	of those, k_groundtruth > k_opt on:           873
+	toboggan has finished on                  1313571
+	of those, k_groundtruth > k_opt on:           874
 	                  trivial instances           170
-	               nontrivial instances           703
+	               nontrivial instances           704
 	average k_gt                                 4.99
 	average k_opt                                3.95
 

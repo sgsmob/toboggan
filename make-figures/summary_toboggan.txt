@@ -9,20 +9,20 @@ toboggan with 800s timeout has
 
 
 human has 
-	total   instances:      1169082
+	total   instances:      1169083
 	trivial instances:       639560
-	nontriv instances:       529522
+	nontriv instances:       529523
 
 toboggan with 50s timeout has
 	timeout instances:         2478
-	success instances:       527044
+	success instances:       527045
 
 
 mouse has 
-	total   instances:      1316056
+	total   instances:      1316058
 	trivial instances:       842873
-	nontriv instances:       473183
+	nontriv instances:       473185
 
 toboggan with 50s timeout has
 	timeout instances:         2487
-	success instances:       470696
+	success instances:       470698
