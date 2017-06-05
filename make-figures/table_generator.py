@@ -35,9 +35,12 @@ def make_tables(inputfile):
     datadict -- key = a string containing the filename and instance number of a graph instance,
                      i.e. "[filename] [instance_number]", e.g. "1.graph 1337"
                 val = index in datamatrix such that datamatrix[val] = info on that graph instance
+    dict_tob_to_cat -- same dictionary as datadict, except the keys are of the format
+                           "[filename] [graph_name]", e.g. "1 ESNRUM000345"
+                           val = gives the key that this graph instance uses in datadict
+    dict_cat_to_tob -- same dictionary as dict_tob_to_cat, except reverse maps vals to keys)
     """
     datamatrix = []
-    #datadict = collections.defaultdict(int)
     datadict = collections.defaultdict(lambda:-1)
     idx = 0
     with open(inputfile, 'r') as datafile:
@@ -73,8 +76,20 @@ def make_tables(inputfile):
                     continue
                 # if we make it this far, replace
                 datamatrix[datadict[key]] = row
-                    
-    return datadict, datamatrix
+
+    # Now create dict of graph file + graph name, from toboggan
+    dict_tob_to_cat = collections.defaultdict(lambda:-1)
+    toboggandict_counter = collections.defaultdict(int)
+    for key, val in datadict.items():
+        gname = datamatrix[val][-1]
+        gfile = key.split()[0]
+        gfile = gfile.split('.')[0]
+        newkey = gfile +' ' + gname
+        toboggandict_counter[newkey] += 1
+        dict_tob_to_cat[newkey] = key
+
+    dict_cat_to_tob = {val: key for key, val in dict_tob_to_cat.items()}
+    return datadict, datamatrix, dict_tob_to_cat, dict_cat_to_tob
 
 
 def print_data_summary( froot, datalen, num_trivial ):
@@ -91,10 +106,30 @@ def print_alg_summary( which_alg, timeoutexceed, num_timedout, num_success ):
 
 
 def get_toboggan_timing_info(datadict, datamatrix):
+    """
+    Outputs a dictionary containing several datastructures of specific info:
+            {'num_trivial':num_trivial,
+            'num_timedout':num_timedout,
+            'time_totals':time_totals,
+            'total_num':total_num,
+            'nontrivials_dict':nontrivials_dict,
+            'toboggan_completed':toboggan_completed,
+            'toboggan_timeouts':toboggan_timeouts,
+            'toboggan_num_paths_dict':toboggan_num_paths_dict}
+        
+    toboggan_completed -- dict where key = nontrivial instances on which
+                        toboggan successfully terminated, and val = runtime
+    toboggan_timeouts -- dict where key = ID of graph instance, val = index in datamatrix
+    toboggan_num_paths_dict -- dict with key = ID of graph instance, val = k_opt
+    """
     num_trivial = 0
     num_timedout = 0
     time_totals = []
+    nontrivials_dict = {}
+    toboggan_completed = collections.defaultdict(lambda:-1)
+    toboggan_timeouts = collections.defaultdict(lambda:-1)
     total_num = len(datamatrix)
+    toboggan_num_paths_dict = collections.defaultdict(lambda:-1)
     for key, val in datadict.items():
         row = datamatrix[val]
         """
@@ -102,11 +137,16 @@ def get_toboggan_timing_info(datadict, datamatrix):
                           k_groundtruth, k_opt, cutset_bound, improved_bound,
                           t_w, t_path, timeout_flag, timeout_limit]
         """
+        nontrivials_dict[key] = 1
         if row[2] == '1':  # trivial instance because reduced graph has 1 node
             num_trivial += 1
+            nontrivials_dict.pop(key, None)
+            toboggan_num_paths_dict[key] = 1
             continue
         elif row[5] == 'None':  # timedout instance
             num_timedout += 1
+            toboggan_timeouts[key] = val
+            toboggan_num_paths_dict[key] = None
             continue
         elif float(row[11]) < float(row[8]):  # timedout instance that failed to timeout
             # don't count it at all, because we rerun it elsewhere
@@ -121,18 +161,29 @@ def get_toboggan_timing_info(datadict, datamatrix):
                 print(froot + " " + key)
                 print(row)
             time_totals.append(time_total)
+            toboggan_completed[key] = time_total
+            toboggan_num_paths_dict[key] = row[5]
     return {'num_trivial':num_trivial,
             'num_timedout':num_timedout,
             'time_totals':time_totals,
-            'total_num':total_num}
+            'total_num':total_num,
+            'nontrivials_dict':nontrivials_dict,
+            'toboggan_completed':toboggan_completed,
+            'toboggan_timeouts':toboggan_timeouts,
+            'toboggan_num_paths_dict':toboggan_num_paths_dict}
 
 def get_catfish_timing_info(datadict, datamatrix):
     time_totals = []
-    total_num = len(datamatrix)
+    times_dict = {} # collections.defaultdict(lambda:False)
+    paths_dict = {} # collections.defaultdict(lambda:False)
     for key, val in datadict.items():
         row = datamatrix[val]
         """
         datamatrix[j] = [ k_gt, k_catfish, time ]
         """
+        if len(row) > 3:
+            print(len(row))
         time_totals.append(float(row[2]))
-    return time_totals
+        times_dict[key] = float(row[2])
+        paths_dict[key] = int(row[1])
+    return time_totals, times_dict, paths_dict
