@@ -1,0 +1,43 @@
+===========================================================================================
+Comparing groundtruth vs optimal paths for mouse
+
+num instances where k_groundtruth > k_optimal:                                     1203
+num trivial instances where gt differs from opt only by repeated paths:             170
+num nontrivial instances gt differs from opt only by repeated paths:                303
+num instances where gt has different paths from opt, but num unique paths = k_opt:     67
+
+Number of instances remaining:                                                      663
+Stats on those:
+ave jaccard index where gt repeats:                                                   0.21006
+ave percent paths_opt contained in paths_gt:                                          0.30859
+ave percent paths_gt contained in paths_opt:                                          0.24971
+
+
+===========================================================================================
+Comparing groundtruth vs optimal paths for zebra
+
+num instances where k_groundtruth > k_optimal:                                      455
+num trivial instances where gt differs from opt only by repeated paths:              53
+num nontrivial instances gt differs from opt only by repeated paths:                136
+num instances where gt has different paths from opt, but num unique paths = k_opt:     29
+
+Number of instances remaining:                                                      237
+Stats on those:
+ave jaccard index where gt repeats:                                                   0.44613
+ave percent paths_opt contained in paths_gt:                                          0.64271
+ave percent paths_gt contained in paths_opt:                                          0.50813
+
+
+===========================================================================================
+Comparing groundtruth vs optimal paths for human
+
+num instances where k_groundtruth > k_optimal:                                      431
+num trivial instances where gt differs from opt only by repeated paths:              90
+num nontrivial instances gt differs from opt only by repeated paths:                 84
+num instances where gt has different paths from opt, but num unique paths = k_opt:     27
+
+Number of instances remaining:                                                      230
+Stats on those:
+ave jaccard index where gt repeats:                                                   0.41354
+ave percent paths_opt contained in paths_gt:                                          0.61536
+ave percent paths_gt contained in paths_opt:                                          0.49721

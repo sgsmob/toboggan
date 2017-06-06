@@ -176,6 +176,7 @@ def get_catfish_timing_info(datadict, datamatrix):
     time_totals = []
     times_dict = {} # collections.defaultdict(lambda:False)
     paths_dict = {} # collections.defaultdict(lambda:False)
+    gt_dict = {}
     for key, val in datadict.items():
         row = datamatrix[val]
         """
@@ -186,4 +187,10 @@ def get_catfish_timing_info(datadict, datamatrix):
         time_totals.append(float(row[2]))
         times_dict[key] = float(row[2])
         paths_dict[key] = int(row[1])
-    return time_totals, times_dict, paths_dict
+        gt_dict[key] = int(row[0])
+    return {
+        'time_totals':time_totals,
+        'times_dict':times_dict,
+        'paths_dict':paths_dict,
+        'gt_dict':gt_dict
+        }
