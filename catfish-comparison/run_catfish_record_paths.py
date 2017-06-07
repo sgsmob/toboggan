@@ -26,17 +26,15 @@ def iterate_over_instances(graph_file,
                 tmp_file.close()
                 # run catfish on that instance
                 starttime = time.time()
-                num_paths = run_single_instance(tmp_file_name, path_to_catfish)
+                ofile, num_paths = run_single_instance(tmp_file_name,
+                                                       path_to_catfish)
                 cattime = time.time() - starttime
                 os.remove(tmp_file_name)
                 # run catfish on that instance
-                starttime = time.time()
-                ofile = run_single_instance(tmp_file_name, path_to_catfish)
-                cattime = time.time() - starttime
-                log_line = "# {}\t{}\t{}\t{}\t{}\n".format(graph_file_name,
-                                                           instance_name,
-                                                           num_paths,
-                                                           cattime)
+                log_line = "# {}\t{}\t{}\t{}\n".format(graph_file_name,
+                                                       instance_name,
+                                                       num_paths,
+                                                       cattime)
                 recording_log_file.write(log_line)
                 for ofile_line in ofile:
                     recording_log_file.write(ofile_line)
@@ -55,12 +53,12 @@ def iterate_over_instances(graph_file,
 
     # run catfish on that instance
     starttime = time.time()
-    ofile = run_single_instance(tmp_file_name, path_to_catfish)
+    ofile, num_paths = run_single_instance(tmp_file_name, path_to_catfish)
     cattime = time.time() - starttime
-    log_line = "# {}\t{}\t{}\t{}\t{}\n".format(graph_file_name,
-                                               instance_name,
-                                               num_paths,
-                                               cattime)
+    log_line = "# {}\t{}\t{}\t{}\n".format(graph_file_name,
+                                           instance_name,
+                                           num_paths,
+                                           cattime)
     recording_log_file.write(log_line)
     for ofile_line in ofile:
         recording_log_file.write(ofile_line)
@@ -88,9 +86,22 @@ def run_single_instance(input_file_name, path_to_catfish):
     # print stderr
     # find the number of paths used
     ofile = open(output_file_name, 'r')
-    # ofile.close()
+    num_paths = count_paths(ofile)
+    ofile.close()
+    return ofile, num_paths
 
-    return ofile
+
+def count_paths(paths_file):
+    """
+    Count the number of paths in the file, stopping at the next '#' if present
+    """
+    count = 0
+    for line in paths_file:
+        if line[0] == "#":
+            break
+        else:
+            count += 1
+    return count
 
 
 def iterate_over_directory(input_dir,
