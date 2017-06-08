@@ -31,7 +31,8 @@ def iterate_over_instances(graph_file,
                 cattime = time.time() - starttime
                 os.remove(tmp_file_name)
                 # run catfish on that instance
-                log_line = "# {}\t{}\t{}\t{}\n".format(graph_file_name,
+                log_line = "# {}\t{}\t{}\t{}\t{}\n".format(graph_file_name,
+                                                       instance_num,
                                                        instance_name,
                                                        num_paths,
                                                        cattime)
@@ -41,6 +42,7 @@ def iterate_over_instances(graph_file,
                 ofile.close()
             # figure out the name of the instance
             instance_name = line.strip().split()[-1]
+            instance_num = line.strip().split()[4]
             # make a temporary file for the input
             tmp_string = 'temp_working_file'
             tmp_file_name = tmp_string+".sgr"
@@ -55,10 +57,11 @@ def iterate_over_instances(graph_file,
     starttime = time.time()
     ofile, num_paths = run_single_instance(tmp_file_name, path_to_catfish)
     cattime = time.time() - starttime
-    log_line = "# {}\t{}\t{}\t{}\n".format(graph_file_name,
-                                           instance_name,
-                                           num_paths,
-                                           cattime)
+    log_line = "# {}\t{}\t{}\t{}\t{}\n".format(graph_file_name,
+                                               instance_num,
+                                               instance_name,
+                                               num_paths,
+                                               cattime)
     recording_log_file.write(log_line)
     for ofile_line in ofile:
         recording_log_file.write(ofile_line)
@@ -88,6 +91,7 @@ def run_single_instance(input_file_name, path_to_catfish):
     ofile = open(output_file_name, 'r')
     num_paths = count_paths(ofile)
     ofile.close()
+    ofile = open(output_file_name, 'r')
     return ofile, num_paths
 
 
