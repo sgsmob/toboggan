@@ -1,0 +1,70 @@
+===========================================================================================
+Comparing groundtruth vs optimal paths for mouse
+
+num instances in mouse                                                          1316058
+num nontrivial instances:                                                        473185
+num toboggan timeouts:                                                             2485
+num nontrivial instances for this comparison:                                    470700
+(sanity check):                                                                  470700
+
+Stats on those nontrivial, non-timeouts:
+overall ave jaccard index:                                                            0.91140
+overall ave percent paths_opt contained in paths_gt:                                  0.91534
+
+total instances for this comparison:                                                   470700
+number instances GT = opt:                                                             424157
+number instances |GT| > |opt| but GT contains opt:                                         34
+number instances |GT| = |opt| but pathsets differ:                                      46192
+number instances |GT| > |opt| and GT different from opt:                                  317
+
+when |GT|>|opt| but GT contains opt, mean |GT|-|opt| is:                              1.14706
+when |GT|=|opt| but paths differ, mean jaccard is:                                    0.10157
+when |GT|>|opt| and pathsets differ, mean intersect(opt,gt)/|opt| is:                 0.57122
+
+
+===========================================================================================
+Comparing groundtruth vs optimal paths for human
+
+num instances in human                                                          1169083
+num nontrivial instances:                                                        529523
+num toboggan timeouts:                                                             2473
+num nontrivial instances for this comparison:                                    527050
+(sanity check):                                                                  527050
+
+Stats on those nontrivial, non-timeouts:
+overall ave jaccard index:                                                            0.94080
+overall ave percent paths_opt contained in paths_gt:                                  0.94469
+
+total instances for this comparison:                                                   527050
+number instances GT = opt:                                                             490623
+number instances |GT| > |opt| but GT contains opt:                                         19
+number instances |GT| = |opt| but pathsets differ:                                      36197
+number instances |GT| > |opt| and GT different from opt:                                  211
+
+when |GT|>|opt| but GT contains opt, mean |GT|-|opt| is:                              1.21053
+when |GT|=|opt| but paths differ, mean jaccard is:                                    0.14180
+when |GT|>|opt| and pathsets differ, mean intersect(opt,gt)/|opt| is:                 0.58073
+
+
+===========================================================================================
+Comparing groundtruth vs optimal paths for zebra
+
+num instances in zebra                                                          1549373
+num nontrivial instances:                                                        445880
+num toboggan timeouts:                                                              178
+num nontrivial instances for this comparison:                                    445702
+(sanity check):                                                                  445702
+
+Stats on those nontrivial, non-timeouts:
+overall ave jaccard index:                                                            0.90189
+overall ave percent paths_opt contained in paths_gt:                                  0.90384
+
+total instances for this comparison:                                                   445702
+number instances GT = opt:                                                             399722
+number instances |GT| > |opt| but GT contains opt:                                         56
+number instances |GT| = |opt| but pathsets differ:                                      45743
+number instances |GT| > |opt| and GT different from opt:                                  181
+
+when |GT|>|opt| but GT contains opt, mean |GT|-|opt| is:                              1.10714
+when |GT|=|opt| but paths differ, mean jaccard is:                                    0.04697
+when |GT|>|opt| and pathsets differ, mean intersect(opt,gt)/|opt| is:                 0.53216
