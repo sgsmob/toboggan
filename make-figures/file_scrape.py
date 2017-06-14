@@ -16,28 +16,21 @@ def main(args):
     datafile = args.datafile
     # print("# fname\t inst\t n\t m\t n_red\t m_red\t k_GT\t k_opt\t cut_bd\t impr_bd\t time_w\t time_p\t time_out")
 
-    files = []
-    instance_num = []
-    name = []
-
-    timed_out_graphs = []
-
-    n_in = []
-    m_in = []
-    n_red = []
-    m_red = []
-    k_gtrue = []
-    k_cutset = []
-    k_improved = []
-    k_opt = []
-    time_w = []
-    time_p = []
-    time_out = []
-    weights = []
 
     time_flag = 0
     timeout_limits = []
+    single_instance_info = [ None for x in range(15) ]
 
+    """
+    For each graph instance, read through toboggan's output and construct as follows:
+    
+    [ filename, instance num,
+      n, m, n_red, m_red,
+      k_groundtruth, k_opt, cutset_bound, improved_bound,
+      t_w, t_path, timeout_flag, timeout_limit,
+      graphname]
+    """
+                                   
     with open(datafile, 'r') as reader:
         content = reader.readlines()
         for line in content:
@@ -47,20 +40,28 @@ def main(args):
                 parts = line.strip().split()
                 if(len(parts) > 0):
                     if(parts[0] == 'File'):
-                        tmp_file = parts[1]
-                        tmp_inst = parts[3]
-                        tmp_name = parts[5]
-                        files.append(tmp_file)
-                        instance_num.append(tmp_inst)
-                        name.append(tmp_name)
-                        timeout_limits.append(-1)
+                        single_instance_info = [ None for x in range(15) ]
+                        single_instance_info[0] = parts[1]
+                        single_instance_info[1] = parts[3]
+                        single_instance_info[14] = parts[5]
                         tmp_timeout_limit = -1
+                        time_flag = 0
                     if(parts[0] == 'Searching'):
                         tmp_timeout_limit = parts[-1]
                     if(parts[0] == 'Timed'):
-                        timed_out_graphs.append((tmp_file, tmp_inst, tmp_name))
                         time_flag = 1
                     if(parts[0] == 'All_info'):
+                        single_instance_info[2] = parts[1]
+                        single_instance_info[3] = parts[2]
+                        single_instance_info[4] = parts[3]
+                        single_instance_info[5] = parts[4]
+                        single_instance_info[6] = parts[5]
+                        single_instance_info[7] = parts[6]
+                        single_instance_info[8] = parts[7]
+                        single_instance_info[9] = parts[8]
+                        single_instance_info[10] = float(parts[9])
+                        single_instance_info[11] = float(parts[10])
+                        """
                         n_in.append(parts[1])
                         m_in.append(parts[2])
                         n_red.append(parts[3])
@@ -71,31 +72,12 @@ def main(args):
                         k_opt.append(parts[8])
                         time_w.append(parts[9])
                         time_p.append(parts[10])
+                        """
                     if(parts[0] == 'Finished'):
-                        time_out.append(time_flag)
-                        time_flag = 0
-                        timeout_limits[-1] = tmp_timeout_limit
-    for j in range(len(n_in)):
-        # print("# fname\t inst\t n\t m\t n_red\t m_red\t k_GT\t k_opt\t cut_bd\t impr_bd\t time_w\t time_p\t time_out")
-        tmp_file = files[j]
-        tmp_inst = instance_num[j]
-        namej = name[j]
-        n_inj = n_in[j]
-        m_inj = m_in[j]
-        n_redj = n_red[j]
-        m_redj = m_red[j]
-        k_gtruej = k_gtrue[j]
-        k_optj = k_opt[j]
-        k_cutsetj = k_cutset[j]
-        k_improvedj = k_improved[j]
-        time_wj = float(time_w[j])
-        time_pj = float(time_p[j])
-        time_outj = time_out[j]
-        timeout_val = timeout_limits[j]
+                        single_instance_info[12] = time_flag
+                        single_instance_info[13] = tmp_timeout_limit
+                        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.10f}\t{:.10f}\t{}\t{}\t{}".format(*single_instance_info))
 
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.10f}\t{:.10f}\t{}\t{}\t{}".format(
-               tmp_file, tmp_inst, n_inj, m_inj, n_redj, m_redj, k_gtruej, k_optj,
-                k_cutsetj, k_improvedj, time_wj, time_pj, time_outj, timeout_val, namej))
 
 
 if __name__ == "__main__":
