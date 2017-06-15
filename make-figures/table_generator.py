@@ -25,7 +25,7 @@ def make_tables(inputfile):
     datamatrix -- list of arrays; each array contains info for a single graph instance:
                   datamatrix[j] = [ n, m, n_red, m_red,
                                    k_groundtruth, k_opt, cutset_bound, improved_bound,
-                                   t_w, t_path, timeout_flag, timeout_limit]
+                                   t_w, t_path, timeout_flag, timeout_limit, graphname]
     
                   if toboggan didn't complete, then
                       k_opt = 'None'; t_w = timeout value, t_path = '0.0'
@@ -33,12 +33,8 @@ def make_tables(inputfile):
                       n_red = 1, m_red = 0
 
     datadict -- key = a string containing the filename and instance number of a graph instance,
-                     i.e. "[filename] [instance_number]", e.g. "1.graph 1337"
+                     i.e. "[filename] [instance_number]", e.g. "1 1337"
                 val = index in datamatrix such that datamatrix[val] = info on that graph instance
-    dict_tob_to_cat -- same dictionary as datadict, except the keys are of the format
-                           "[filename] [graph_name]", e.g. "1 ESNRUM000345"
-                           val = gives the key that this graph instance uses in datadict
-    dict_cat_to_tob -- same dictionary as dict_tob_to_cat, except reverse maps vals to keys)
     """
     datamatrix = []
     datadict = collections.defaultdict(lambda:-1)
@@ -46,14 +42,17 @@ def make_tables(inputfile):
     with open(inputfile, 'r') as datafile:
         for line in datafile:
             # a line from datafile has format
-            # filename instance# n m n_red m_red k_groundtruth k_opt cutset_bound improved_bound t_w t_path
+            # [ filename instance# n m n_red m_red k_groundtruth k_opt
+            # cutset_bound improved_bound t_w t_path, timeout_flag, timeout_limit, graphname ]
             temp_line = line.strip().split()
-            key = temp_line[0] + ' ' + temp_line[1]
+            temp_filename = temp_line[0].split('.')[0]
+            key = temp_filename + ' ' + temp_line[1]
             row = temp_line[2::]
             current_time = float(row[8])
             timeout_limit = float(row[11])
             if (timeout_limit != -1) & (timeout_limit < current_time):
                 # if instance failed to timeout, disregard entirely
+                # because we re-ran it to get proper information
                 continue
             elif datadict[key] == -1:  # nothing present, so add the row
                 datamatrix.append(row)
@@ -61,35 +60,25 @@ def make_tables(inputfile):
                 idx +=1
             else:  # row present; check if should be updated
                 newtime = float(row[8])
-                newstatus = row[10]
-                oldtime = float(datamatrix[datadict[key]][8])
-                oldstatus = float(datamatrix[datadict[key]][10])
+                newstatus = float(row[10])
                 newlimit = float(row[11])
-                oldlimit = float(datamatrix[datadict[key]][11])
+                current_idx = datadict[key]
+                oldtime = float(datamatrix[current_idx][8])
+                oldstatus = float(datamatrix[current_idx][10])
+                oldlimit = float(datamatrix[current_idx][11])
                 
-                if newstatus == '1':
-                    if oldstatus == '0':
-                        continue
-                    elif newlimit < oldlimit:
-                        continue
-                if (oldstatus == '0') & (newtime > oldtime):
-                    continue
-                # if we make it this far, replace
-                datamatrix[datadict[key]] = row
+                # replace the old data row with the new data row
+                # only if the new data row has a better runtime, or a larger timeout value
+                if newstatus == 0:
+                    if oldstatus == 1:
+                        datamatrix[datadict[key]] = row
+                    elif oldstatus == 0 and newtime < oldtime:
+                        datamatrix[datadict[key]] = row
+                elif newstatus == 1:
+                    if oldstatus == 1 and newlimit > oldlimit:
+                        datamatrix[datadict[key]] = row
 
-    # Now create dict of graph file + graph name, from toboggan
-    dict_tob_to_cat = collections.defaultdict(lambda:-1)
-    toboggandict_counter = collections.defaultdict(int)
-    for key, val in datadict.items():
-        gname = datamatrix[val][-1]
-        gfile = key.split()[0]
-        gfile = gfile.split('.')[0]
-        newkey = gfile +' ' + gname
-        toboggandict_counter[newkey] += 1
-        dict_tob_to_cat[newkey] = key
-
-    dict_cat_to_tob = {val: key for key, val in dict_tob_to_cat.items()}
-    return datadict, datamatrix, dict_tob_to_cat, dict_cat_to_tob
+    return datadict, datamatrix
 
 
 def print_data_summary( froot, datalen, num_trivial ):

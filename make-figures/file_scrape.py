@@ -26,7 +26,7 @@ def main(args):
     
     [ filename, instance num,
       n, m, n_red, m_red,
-      k_groundtruth, k_opt, cutset_bound, improved_bound,
+      k_groundtruth, cutset_bound, improved_bound, k_opt,
       t_w, t_path, timeout_flag, timeout_limit,
       graphname]
     """

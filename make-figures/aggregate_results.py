@@ -34,8 +34,8 @@ if __name__ == "__main__":
                         " files", type=str)
     parser.add_argument("fname", help="name of data type: human, zebra, mouse",
                         type=str)
-    parser.add_argument("results_file_name", help="name of file to store notes"
-                        "of instances that are nonoptimal", type=str)
+    parser.add_argument("results_file_name", help="name of file to store condensed"
+                        " results", type=str)
 
     args = parser.parse_args()
     main(args)
