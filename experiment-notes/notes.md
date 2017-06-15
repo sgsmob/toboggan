@@ -1,5 +1,24 @@
 # Toboggan experiment notes
 
+
+## Explanation of format of output
+
+Catfish:  `/toboggan/catfish-comparison/catfish-log-*`
+
+* contains all timing and pathset information in the following format
+  * `# [filenumber] [instancenumber] [instancename] [numpaths] [time]`
+    * e.g. `# 85	0	ENSMUSG00000109048	1	0.004927873611450195`
+    * tab separated
+  * after each line that begins with a `#` there is one line for each path in that catfish-solution, of the format:
+    * `path [numpaths], weight = [weightvalue], vertices = [list of vertices separated by spaces]`
+    * e.g. `path 1, weight = 917, vertices = 0 1 2 3 4 5`
+    * space separated
+
+
+Toboggan:  `/toboggan/make-figures/data/*-master-file.txt`
+
+* contains all experiment info in large complicated blocks of text
+
 ## Unexplained timeout behavior
 
 Running on zebrafish/83.graph instance 9941 with a timeout of 30 set, toboggan.py nevertheless ran for 41 seconds (at which point the instance successfully terminated). To the best of my memory, this took place on shrubbery while multiple other experiments (i.e. calling toboggan.py) were taking place in parallel via screen.
