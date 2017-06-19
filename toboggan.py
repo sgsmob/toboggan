@@ -192,7 +192,9 @@ if __name__ == "__main__":
         print("\nFile {} instance {} name {} with n = {}, m = {}, and truth = "
               "{}:".format(filename, graphnumber, graphname, n_input,
                            m_input, k if k else "?"), flush=True)
+
         start = time.time()
+        # contract in-/out-degree 1 vertices
         reduced, mapping = graph.contracted()
         # reduced is the graph after contractions;
         # mapping enables mapping paths on reduced back to paths in graph
@@ -257,6 +259,8 @@ if __name__ == "__main__":
                 print("# Solutions:")
                 weight_vec = []
                 k_opt = len(weights)
+
+                # convert contracted paths to full paths
                 for path_deq, weight in solution_paths:
                     real_path = []
                     for arc in path_deq:
@@ -270,6 +274,7 @@ if __name__ == "__main__":
                     if args.print_arcs:
                         print("\tarc-labels: {}".format(real_path))
 
+        # print experimental statistics
         if args.experiment_info:
             print("# All_info\tn_in\tm_in\tn_red\tm_red\tk_gtrue\tk_cut"
                   "\tk_impro\tk_opt\ttime_w\ttime_p")
