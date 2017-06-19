@@ -135,15 +135,26 @@ class AdjList:
         1 or v has in degree 1 are contracted.
         """
         res = self.copy()
+        # remembering which arcs were contracted in order to reconstruct the
+        # paths in the original graph later
         arc_mapping = {e: [e] for e, _ in res.arcs()}
         # contract out degree 1 vertices
         for u in list(res):
             if res.out_degree(u) == 1:
-                # print(u, res.out_arcs(u))
                 arc = res.out_arcs(u)[0]
                 # mark u's inarcs to know they use the arc to be contracted
                 for a in res.in_arcs(u):
                     arc_mapping[a].extend(arc_mapping[arc])
+                # if u is the source, it has no in-arcs to mark the
+                # contraction of this out-arc, so we store it in the out-arcs
+                # of its out-neighbor.
+                if res.in_degree(u) == 0:
+                    v = res.out_neighborhood(u)[0][0]
+                    for a in res.out_arcs(v):
+                        new_path = list(arc_mapping[arc])
+                        new_path.extend(arc_mapping[a])
+                        arc_mapping[a] = new_path
+
                 # contract the edge
                 res.contract_edge(arc, keep_source=False)
         # contract in degree 1 vertices
@@ -155,6 +166,14 @@ class AdjList:
                     new_path = list(arc_mapping[arc])
                     new_path.extend(arc_mapping[a])
                     arc_mapping[a] = new_path
+                # if u is the sink, it has no out-arcs to mark the contraction
+                # of this in-arc, so we store it in the in-arcs of its
+                # in-neighbor.
+                if res.out_degree(v) == 0:
+                    u = res.in_neighborhood(v)[0][0]
+                    for a in res.in_arcs(u):
+                        arc_mapping[a].extend(arc_mapping)
+
                 # print("{} has in degree 1 from {}".format(v,u))
                 res.contract_edge(arc, keep_source=True)
         return res, arc_mapping
