@@ -4,6 +4,7 @@ import collections
 from plot_overlap_ratios import plot_ratio_success
 from algorithm_output_parser import process_algorithm_output
 from algorithm_output_parser import toboggan_output_parser
+from algorithm_output_parser import toboggan_clean_output_parser
 from algorithm_output_parser import catfish_output_parser
 
 import table_generator
@@ -53,6 +54,15 @@ def get_all_data(data_indices=[0,1,2]):
         # [3] Get toboggan path info
         toboggan_results_file = './data/master-clean-' + froot + '.txt'
         all_toboggan_paths = toboggan_clean_output_parser(toboggan_results_file, verbose=False)
+        # now replace all the incorrect pathsets with the reruns
+        toboggan_reruns_clean_results_file = './data/reruns-incorrect-clean-' + froot + '.txt'
+        from pathlib import Path
+        my_file = Path(toboggan_reruns_clean_results_file)
+        if my_file.is_file():
+            toboggan_reruns_paths_clean = toboggan_clean_output_parser(toboggan_reruns_clean_results_file, verbose=False)
+            for key, val in toboggan_reruns_paths_clean.items():
+                all_toboggan_paths[key] = val
+
         # Prune toboggan misfits
         # (these instances somehow ran until successfully terminating, after the timeout limit had elapsed
         temp_list_of_misfits = []
