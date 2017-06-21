@@ -128,3 +128,37 @@ def toboggan_output_parser(toboggan_results_file, filename_instancenum_dict, ver
                 toboggan_path_dict = defaultdict(list)
                 toboggan_weight = []
     return solutions
+
+def toboggan_clean_output_parser(toboggan_results_file, verbose=False):
+    
+    def convert_text_to_path(line):
+            text_list = line.strip().split('\t')[1]
+            text_list = text_list[1:-1].split(', ')  # omit the brackets and commas
+            return list(map(lambda x: int(x), text_list))
+        
+    # Make dict with key = filename, val = set of instances in that file to check
+    solutions = defaultdict(set)
+
+    # temp data structures
+    current_key_pattern = None
+    temp_path_set = set()
+    
+    # iterate over lines to the end of file,
+    # checking for instances in instance_set
+    with open(toboggan_results_file, 'r') as reader:
+        for line in reader:
+            # get filename+instancenum info
+            current_line = line.strip().split()
+            if '#' in line:
+                if current_key_pattern != None:
+                    solutions[current_key_pattern] = temp_path_set
+                current_key_pattern = current_line[1] + ' ' + current_line[2]  # key = 'filenum instancenum'
+                temp_path_set = set()
+                
+            else:
+                path = tuple(map(lambda x: int(x), current_line))
+                temp_path_set.add(path)
+                
+        solutions[current_key_pattern] = temp_path_set
+
+    return solutions

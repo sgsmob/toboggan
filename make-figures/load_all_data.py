@@ -51,8 +51,8 @@ def get_all_data(data_indices=[0,1,2]):
         all_path_info['catfish'][froot] = all_catfish_paths
 
         # [3] Get toboggan path info
-        toboggan_results_file = './data/' + froot + '-master-file.txt'
-        all_toboggan_paths = toboggan_output_parser(toboggan_results_file, gt_pathset_dict, verbose=False)
+        toboggan_results_file = './data/master-clean-' + froot + '.txt'
+        all_toboggan_paths = toboggan_clean_output_parser(toboggan_results_file, verbose=False)
         # Prune toboggan misfits
         # (these instances somehow ran until successfully terminating, after the timeout limit had elapsed
         temp_list_of_misfits = []
