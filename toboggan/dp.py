@@ -5,87 +5,51 @@
 # under the three-clause BSD license; see LICENSE.
 #
 # python libs
-import time
-from operator import itemgetter
-from collections import defaultdict
+from collections import defaultdict, deque
 
 # local imports
-from toboggan.flow import Instance, Constr, SolvedConstr, PathConf
+from toboggan.flow import Constr, SolvedConstr, PathConf
 
 
 def solve(instance, silent=True, guessed_weights=None):
-    dpgraph = instance.dpgraph
+    """
+    Find a feasible set of weights consistent with guessed_weights.
+
+    guessed_weights is a sorted tuple of size k in which any of the entries
+    might be None.  If guessed_weights is k integers, check whether this
+    solution works.  If any entry of guessed_weights is None, check whether a
+    solution exists with each None replaced by a integer that respects the
+    sorted order of the tuple.
+    """
+    graph = instance.graph
     k = instance.k
-    n = instance.n
 
-    if not silent:
-        print(dpgraph)
-
-    if instance.max_weight_bounds[0] > instance.max_weight_bounds[1]:
-        return set()  # Instance is not feasible
     # The only constraint a priori is the total flow value
     globalconstr = Constr(instance)
     guessed_weights = [None]*k if not guessed_weights else guessed_weights
-
-    # We sometimes obtain tight bounds for the highest weight. This either
-    # gives us the highest weight for free or contradicts a guessed weight.
-    if instance.max_weight_bounds[0] == instance.max_weight_bounds[1]:
-        if guessed_weights[-1] is None:
-            guessed_weights[-1] = instance.max_weight_bounds[0]
-        elif guessed_weights[-1] != instance.max_weight_bounds[0]:
-            return set()  # Guessed weights not feasible
-
-    # If there exists a weight-one edge we know what the smallest weight
-    # should be.
-    if min(instance.weights) == 1:
-        if guessed_weights[0] is None:
-            guessed_weights[0] = 1
-        elif guessed_weights[0] != 1:
-            return set()  # Guessed weights not feasible
 
     assert len(guessed_weights) == k
     for index, guess in enumerate(guessed_weights):
         if guess is None:
             continue
         globalconstr = globalconstr.add_constraint([index], (0, guess))
-
-    # Check whether there is a cut-vertex of out-degree k,
-    # this lets us derive the path values directly.
-    # Also check whether any active set has size larger than k, in which case
-    # this is a no-instance
-    for i, cut in enumerate(instance.cuts):
-        if len(cut) > k:
-            return set()  # Early out: no solution
-        if len(cut) == 1 and len(dpgraph[i]) == k:
-            # Important: path weights must be sorted, otherwise our
-            # subsequent optimizations will remove this constraint.
-            weights = sorted(map(itemgetter(1), dpgraph[i]))
-            if not silent:
-                print("Found bottleneck. Path weights are {}".format(weights))
-            globalconstr = SolvedConstr(weights, instance)
+        if globalconstr is None:
+            return set()
 
     # Build first DP table
-    table = defaultdict(set)
+    old_table = defaultdict(set)
     allpaths = frozenset(range(k))
     # All k paths `end' at source
-    table[PathConf.init(0, allpaths)] = set([globalconstr])
+    old_table[PathConf(graph.source(), allpaths)] = set([globalconstr])
 
-    DP = [None] * (n)
-    DP[0] = table
-
-    # Run DP
-    for i in range(n-1):
-        if not silent:
-            print("")
-            print("Active ({}): {}".format(i, instance.cuts[i]))
-            print("Removing {} from active set".format(i))
-
-        DP[i+1] = defaultdict(set)
-        for paths, constraints in DP[i].items():
+    # run dynamic progamming
+    for v in instance.ordering[:-1]:
+        new_table = defaultdict(set)
+        for paths, constraints in old_table.items():
             # Distribute paths incoming to i onto its neighbours
             if not silent:
                 print("  Pushing {}".format(paths))
-            for newpaths, dist in paths.push(i, dpgraph[i]):
+            for newpaths, dist in paths.push(v, graph.labeled_neighborhood(v)):
                 # if not silent:
                     # print("  Candidate paths", newpaths)
                 debug_counter = 0
@@ -94,39 +58,107 @@ def solve(instance, silent=True, guessed_weights=None):
                     # Update constraint-set constr with new constraints imposed
                     # by our choice of pushing paths o..........es (as
                     # described by dist)
-                    newconstr = constr
+                    curr_constr = constr
                     try:
                         for e, p in dist:  # Paths p coincide on edge e
-                            newconstr = newconstr.add_constraint(p, e)
-                    except ValueError as e:
+                            updated_constr = curr_constr.add_constraint(p, e)
+                            if updated_constr is not None:
+                                curr_constr = updated_constr
+                            else:
+                                break
+                        else:
+                            # WORRY ABOUT THIS EVENTUALLY
+                            if constr.rank == curr_constr.rank or \
+                                    not curr_constr.is_redundant():
+                                # Add to DP table
+                                new_table[newpaths].add(curr_constr)
+                    except ValueError as err:
                         print("Problem while adding constraint", p, e)
-                        raise e
-                    except AttributeError:
-                        assert(newconstr is None)
-                        pass
-
-                    if newconstr is None:
-                        pass  # Infeasible constraints
-                    elif newconstr.is_redundant(newpaths):
-                        if not silent:
-                            print(".", end="")
-                            debug_counter += 1
-                            if debug_counter > 80:
-                                debug_counter = 0
-                                print()
-                        pass  # Redundant constraints
-                    else:
-                        if not silent:
-                            if newpaths not in DP[i+1] or \
-                                    newconstr not in DP[i+1][newpaths]:
-                                print()
-                                print("    New path-constr pair",
-                                      newpaths, newconstr)
-                        DP[i+1][newpaths].add(newconstr)  # Add to DP table
+                        raise err
+        # replace tables
+        old_table = new_table
 
     if not silent:
         print("\nDone.")
-        print(DP[n-1])
+        print(new_table)
 
-    candidates = DP[n-1][PathConf.init(n-1, allpaths)]
+    candidates = new_table[PathConf(graph.sink(), allpaths)]
     return candidates
+
+
+def recover_paths(instance, weights, silent=True):
+    """Recover the paths that correspond to the weights given."""
+    graph = instance.graph
+    k = instance.k
+
+    if not silent:
+        print(graph)
+
+    # since we know all the weights, we can stored them as a solved constraint
+    # system
+    globalconstr = SolvedConstr(weights, instance)
+
+    assert len(weights) == k
+    allpaths = frozenset(range(k))
+
+    # Build DP table, which will map path configurations to the path
+    # configurations in the previous tables that yielded the specific entry
+    # All k paths start at the source vertex
+    initial_entries = {PathConf(graph.source(), allpaths): None}
+    backptrs = [initial_entries]
+
+    # Run DP
+    for v in instance.ordering[:-1]:
+        entries = {}
+        for old_paths in backptrs[-1].keys():
+            # Distribute paths incoming to i onto its neighbors
+            if not silent:
+                print("  Pushing {}".format(old_paths))
+            for new_paths, dist in \
+                    old_paths.push(v, graph.labeled_neighborhood(v)):
+                # make sure the sets of paths that were pushed along each
+                # edge sum to the proper flow value.  If not, don't create a
+                # new table entry for this path set.
+                for arc, pathset in dist:  # Paths pathset coincide on arc
+                    success = globalconstr.add_constraint(pathset, arc)
+                    if success is None:
+                        break
+                else:
+                    if new_paths not in entries:
+                        entries[new_paths] = old_paths
+
+        # add the new entries to the list of backpointers
+        backptrs.append(entries)
+
+    if not silent:
+        print("\nDone.")
+        for bp in backptrs:
+            print(bp)
+
+    # recover the paths
+    full_paths = [[deque(), weight] for weight in weights]
+    try:
+        # the "end" of the DP is all paths passing through the sink
+        # conf = PathConf(graph.sink(), allpaths)
+        conf = list(backptrs[-1].keys())[0]
+        # iterate over the backpointer list in reverse
+        for table in reversed(backptrs):
+            for v in conf:
+                # get the paths crossing this vertex
+                incidence = conf[v]
+                # vertices might repeat in consecutive table entries if an edge
+                # is "long" wrt the topological ordering.  Don't add it twice
+                # to the path lists in this case.
+                for p in incidence:
+                    arc_used = conf.arcs_used[p]
+                    if arc_used == -1:
+                        break
+                    if len(full_paths[p][0]) == 0 or \
+                            full_paths[p][0][0] != arc_used:
+                        full_paths[p][0].appendleft(arc_used)
+            # traverse the pointer backwards
+            conf = table[conf]
+    except KeyError as e:
+        raise Exception("The set of weights is not a valid solution") from e
+
+    return full_paths

@@ -1,8 +1,6 @@
 # Toboggan
 
-Toboggan is a research tool for decomposing a flow on a directed acyclic graph into
-a minimal number of paths, a problem that commonly occurs in transcript and metagenomic
-assembly.
+Toboggan is a research tool for decomposing a flow on a directed acyclic graph into a minimal number of paths, a problem that commonly occurs in transcript and metagenomic assembly.
 
 ## Command line usage
 ```
@@ -21,7 +19,6 @@ tried until a solution is found.
 Optional arguments:
   * `-h, --help` - Show a help message and exit
   * `--timeout` TIMEOUT - Set a timeout for the computation of each individual instance.
-  * `--disprove` - Run instances with parameter k-1 instead of k (needs a `.truth` file)
   * `--indices` INDICES -  Either a file containing indices (position in `.graph`
                      file) on which to run, or a list of indices separated by
                      commas. Ranges are accepted as well, e.g. "1,2-5,6".
@@ -37,23 +34,104 @@ contained in `toboggan_test.graph`. The outputs should looks as follows:
 
 ```
 # No timeout set
+# Recovering paths
 # Running on instances 1,3-5
-# Using ground-truth from file testdata/toboggan_test.truth
-1 toboggan_test:0 with n = 3, m = 4, and k = 3: 
-Computation took 0.00 seconds
-Solutions: {SolvedConstr (10, 20, 20)}
+# Ground-truth available in file testdata/toboggan_test.truth
 
-3 toboggan_test:2 with n = 3, m = 4, and k = 3: 
-Computation took 0.00 seconds
-Solutions: {SolvedConstr (100, 200, 300)}
+File toboggan_test.graph instance 0 name three_paths_10_20_20 with n = 5, m = 6, and truth = 3:
+# Preprocessing
+# Graph has an edge cut of size 2.
+# Investigating cutsets yields bound 3.
+# User supplied k value of 3.
+# Continuing using k = 3
+# Reduced instance has n = 3, m = 4, and lower_bound = 3:
+Searching for minimum-sized set of weights, timeout set at -1
+#   Call guess_weight with k = 3
+# Weights computation took 0.00 seconds
+# Solution: {SolvedConstr (10, 20, 20)}
+# Now recovering the 3 paths in the solution (10, 20, 20)
+# Recovery took 0.00 seconds
+# Paths, weights pass test: flow decomposition confirmed.
+# Solutions:
+#   Path with weight = 10
+#   [0, 2, 1, 4]
+#   Path with weight = 20
+#   [0, 2, 1, 3, 4]
+#   Path with weight = 20
+#   [0, 1, 3, 4]
+Finished instance.
 
-4 toboggan_test:3 with n = 3, m = 6, and k = 4: 
-Computation took 0.00 seconds
-Solutions: {SolvedConstr (25, 25, 50, 50)}
 
-5 toboggan_test:4 with n = 2, m = 2, and k = 2: 
-Computation took 0.00 seconds
-Solutions: {SolvedConstr (1, 8)}
+File toboggan_test.graph instance 2 name three_paths_100_200_300 with n = 5, m = 6, and truth = 3:
+# Preprocessing
+# Graph has an edge cut of size 2.
+# Investigating cutsets yields bound 2.
+# User supplied k value of 3.
+# Continuing using k = 2
+# Reduced instance has n = 3, m = 4, and lower_bound = 3:
+Searching for minimum-sized set of weights, timeout set at -1
+#   Call guess_weight with k = 3
+# Weights computation took 0.00 seconds
+# Solution: {SolvedConstr (100, 200, 300)}
+# Now recovering the 3 paths in the solution (100, 200, 300)
+# Recovery took 0.00 seconds
+# Paths, weights pass test: flow decomposition confirmed.
+# Solutions:
+#   Path with weight = 100
+#   [0, 1, 3, 4]
+#   Path with weight = 200
+#   [0, 1, 4]
+#   Path with weight = 300
+#   [0, 2, 1, 3, 4]
+Finished instance.
+
+
+File toboggan_test.graph instance 3 name four_paths_25_25_50_50 with n = 5, m = 8, and truth = 4:
+# Preprocessing
+# Graph has an edge cut of size 4.
+# Investigating cutsets yields bound 4.
+# User supplied k value of 4.
+# Continuing using k = 4
+# Reduced instance has n = 3, m = 6, and lower_bound = 4:
+Searching for minimum-sized set of weights, timeout set at -1
+#   Call guess_weight with k = 4
+# Weights computation took 0.00 seconds
+# Solution: {SolvedConstr (25, 25, 50, 50)}
+# Now recovering the 4 paths in the solution (25, 25, 50, 50)
+# Recovery took 0.00 seconds
+# Paths, weights pass test: flow decomposition confirmed.
+# Solutions:
+#   Path with weight = 25
+#   [0, 1, 4]
+#   Path with weight = 25
+#   [0, 3, 2, 1, 4]
+#   Path with weight = 50
+#   [0, 2, 4]
+#   Path with weight = 50
+#   [0, 3, 4]
+Finished instance.
+
+
+File toboggan_test.graph instance 4 name two_paths_1_8 with n = 4, m = 4, and truth = 2:
+# Preprocessing
+# Graph has an edge cut of size 2.
+# Investigating cutsets yields bound 2.
+# User supplied k value of 2.
+# Continuing using k = 2
+# Reduced instance has n = 2, m = 2, and lower_bound = 2:
+Searching for minimum-sized set of weights, timeout set at -1
+#   Call guess_weight with k = 2
+# Weights computation took 0.00 seconds
+# Solution: {SolvedConstr (1, 8)}
+# Now recovering the 2 paths in the solution (1, 8)
+# Recovery took 0.00 seconds
+# Paths, weights pass test: flow decomposition confirmed.
+# Solutions:
+#   Path with weight = 1
+#   [0, 1, 3]
+#   Path with weight = 8
+#   [0, 2, 3]
+Finished instance.
 ```
 
 The outputs tells us that e.g. the first instance has a solution with one path
@@ -65,12 +143,16 @@ $>python3 toboggan.py testdata/toboggan_test.graph --indices 2
 the output should consist of the message
 ```
 # No timeout set
+# Recovering paths
 # Running on instances 2
-# Using ground-truth from file testdata/toboggan_test.truth
-2 toboggan_test:1 is trivial.
+# Ground-truth available in file testdata/toboggan_test.truth
+
+File toboggan_test.graph instance 1 name trivial_117 with n = 4, m = 3, and truth = 1:
+Trivial.
+Finished instance.
 ```
 
-The term `trivial` here mans that the instance consists only of a single path.
+The term `trivial` here means that the instance consists only of a single path.
 
 ### Data formatting
 #### Datasets

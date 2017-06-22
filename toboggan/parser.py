@@ -4,22 +4,30 @@
 # under the three-clause BSD license; see LICENSE.
 #
 # local imports
-import toboggan.graphs
 from toboggan.graphs import AdjList
 # python libs
-import os
 import re
+import os
 
 header_regex = re.compile('# graph number = ([0-9]*) name = (.*)')
 edge_regex = re.compile('(\d*) (\d*) (\d*\.\d*)')
 
 
+def read_sgr(graph_file):
+    """Read a single graph from a .sgr file."""
+    with open(graph_file, 'r') as f:
+        num_nodes = int(f.readline().strip())
+        graph = AdjList(graph_file, None, None, num_nodes)
+        for line in f:
+            edge_data = line.split()
+            u = int(edge_data[0])
+            v = int(edge_data[1])
+            flow = int(float(edge_data[2]))
+            graph.add_edge(u, v, flow)
+        return graph, None, 0
+
+
 def enumerate_graphs(graph_file):
-    for x in enumerate_graphs_verbose(graph_file):
-        yield x[0]
-
-
-def enumerate_graphs_verbose(graph_file):
     def read_next_graph(f):
         header_line = f.readline()
 
@@ -66,11 +74,6 @@ def enumerate_graphs_verbose(graph_file):
 
 
 def enumerate_decompositions(decomposition_file):
-    for x in enumerate_decompositions_verbose(decomposition_file):
-        yield (x[0], x[2])  # Return name & decomposition
-
-
-def enumerate_decompositions_verbose(decomposition_file):
     def read_next_decomposition(f):
         header_line = f.readline()
 
@@ -110,47 +113,18 @@ def enumerate_decompositions_verbose(decomposition_file):
                 yield decomposition
 
 
-def append_graph_to_file(graph, filename):
-    with open(filename, "a") as f:
-        f.write("# graph number = {} name = {}\n".format(graph.graph_number,
-                graph.name))
-        f.write(str(graph.num_nodes()) + "\n")
-        for (u, v, flow) in graph.edges():
-            f.write("{} {} {}\n".format(u, v, flow))
-
-
-def read_instances(graph_file, truth_file, indices=None):
-    if indices:
-        indices_set = set(indices)
-        max_index = max(indices)
-
-        index = 0
-        for (graph, truth) in zip(enumerate_graphs(graph_file),
-                                  enumerate_decompositions(truth_file)):
-            index += 1
-            if index in indices_set:
-                yield (graph, truth, index)
-
-            if index > max_index:
-                break
-    else:
-        index = 0
-        for (graph, truth) in zip(enumerate_graphs(graph_file),
-                                  enumerate_decompositions(truth_file)):
-            index += 1
-            yield (graph, truth, index)
-
-
-def read_instances_verbose(graph_file, truth_file):
+def read_instances(graph_file, truth_file):
     index = 0
-    if truth_file:
-        for graphdata, truthdata in zip(enumerate_graphs_verbose(graph_file),
-                                        enumerate_decompositions_verbose(
+    if os.path.splitext(graph_file)[1] == ".sgr":
+        yield read_sgr(graph_file), None, 0
+    elif truth_file:
+        for graphdata, truthdata in zip(enumerate_graphs(graph_file),
+                                        enumerate_decompositions(
                                         truth_file)):
             index += 1
             _, _, solution = truthdata
             yield (graphdata, len(solution), index)
     else:
-        for graphdata in enumerate_graphs_verbose(graph_file):
+        for graphdata in enumerate_graphs(graph_file):
             index += 1
             yield (graphdata, None, index)
