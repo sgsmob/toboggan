@@ -152,7 +152,7 @@ Trivial.
 Finished instance.
 ```
 
-The term `trivial` here mans that the instance consists only of a single path.
+The term `trivial` here means that the instance consists only of a single path.
 
 ### Data formatting
 #### Datasets
