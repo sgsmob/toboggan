@@ -240,13 +240,13 @@ if __name__ == "__main__":
             k_cutset = instance.max_edge_cut_size
 
             # find the optimal solution size
-            if args.profile:
-                prof = cProfile.Profile()
-                prof.enable()
+            # if args.profile:
+            #     prof = cProfile.Profile()
+            #     prof.enable()
             solution_weights, time_weights = find_opt_size(instance, maxtime)
-            if args.profile:
-                prof.disable()
-                prof.print_stats('tottime')
+            # if args.profile:
+            #     prof.disable()
+            #     prof.print_stats('tottime')
 
             time_paths = 0
             # recover the paths in an optimal solution
