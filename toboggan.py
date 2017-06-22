@@ -113,8 +113,6 @@ if __name__ == "__main__":
         description = desc.read()
     parser = DefaultHelpParser(description=description)
     parser.add_argument('file', help='A .graph file containing the input graph(s).')
-    parser.add_argument('-p', '--profile',
-                        help="Activates a profiler for function calls.", action='store_true')
     parser.add_argument('--indices',
                         help='Either a file containing indices '
                         '(position in .graph file) on which to run, '
