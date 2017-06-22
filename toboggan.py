@@ -113,8 +113,7 @@ if __name__ == "__main__":
         description = desc.read()
     parser = DefaultHelpParser(description=description)
     parser.add_argument('file', help='A .graph file containing the input graph(s).')
-    parser.add_argument('--indices',
-                        help='Either a file containing indices '
+    parser.add_argument('--indices', help='Either a file containing indices '
                         '(position in .graph file) on which to run, '
                         'or a list of indices separated by commas. '
                         'Ranges are accepted as well, e.g. "1,2-5,6".',
@@ -169,7 +168,7 @@ if __name__ == "__main__":
         if lastprinted != a[-1]:
             res += "-" + str(a[-1])
 
-        print("# Running on instances", res)
+        print("# Running on instance(s)", res)
     else:
         print("# Running on all instances")
 
