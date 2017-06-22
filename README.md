@@ -1,8 +1,6 @@
 # Toboggan
 
-Toboggan is a research tool for decomposing a flow on a directed acyclic graph into
-a minimal number of paths, a problem that commonly occurs in transcript and metagenomic
-assembly.
+Toboggan is a research tool for decomposing a flow on a directed acyclic graph into a minimal number of paths, a problem that commonly occurs in transcript and metagenomic assembly.
 
 ## Command line usage
 ```
@@ -21,7 +19,6 @@ tried until a solution is found.
 Optional arguments:
   * `-h, --help` - Show a help message and exit
   * `--timeout` TIMEOUT - Set a timeout for the computation of each individual instance.
-  * `--disprove` - Run instances with parameter k-1 instead of k (needs a `.truth` file)
   * `--indices` INDICES -  Either a file containing indices (position in `.graph`
                      file) on which to run, or a list of indices separated by
                      commas. Ranges are accepted as well, e.g. "1,2-5,6".

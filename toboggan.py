@@ -128,15 +128,12 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--print_contracted', help="Print contracted graph.",
                         action='store_true')
-    parser.add_argument('--disprove', help='Run instance with parameter k-1 '
-                        'instead of k to see if ground truth was correct(needs a .truth file).',
-                        action='store_true')
     parser.add_argument('--experiment_info', help='Print out experiment-'
                         'relevant info in format convenient for processing.',
                         action='store_true')
     parser.add_argument("--no_recovery", help="Only print the number of paths"
                         " and their weights in an optimal decomposition, but"
-                        " do not recover the paths", action='store_true')
+                        " do not recover the paths.", action='store_true')
 
     args = parser.parse_args()
 
@@ -225,10 +222,6 @@ if __name__ == "__main__":
             else:
                 weights = [0]
         else:
-            if args.disprove and k:
-                k = k - 1
-                print("# Using parameter k-1")
-
             # create an instance of the graph
             if args.skip_truth:
                 k = 1
@@ -239,14 +232,7 @@ if __name__ == "__main__":
 
             k_cutset = instance.max_edge_cut_size
 
-            # find the optimal solution size
-            # if args.profile:
-            #     prof = cProfile.Profile()
-            #     prof.enable()
             solution_weights, time_weights = find_opt_size(instance, maxtime)
-            # if args.profile:
-            #     prof.disable()
-            #     prof.print_stats('tottime')
 
             time_paths = 0
             # recover the paths in an optimal solution
