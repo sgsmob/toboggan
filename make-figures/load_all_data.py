@@ -1,7 +1,6 @@
 # [1] COLLECT ALL GROUND TRUTH DATA
 from parse_truth_ALL import main as parse_truth_all
 import collections
-from plot_overlap_ratios import plot_ratio_success
 from algorithm_output_parser import process_algorithm_output
 from algorithm_output_parser import toboggan_output_parser
 from algorithm_output_parser import toboggan_clean_output_parser
@@ -24,7 +23,7 @@ def get_all_data(data_indices=[0,1,2]):
         print("Loading {}".format(froot))
 
         # [0] Get the rest of toboggan analysis
-        inputfile = "all-" + froot + ".txt"
+        inputfile = "./data/all-" + froot + ".txt"
         datadict, datamatrix = table_generator.make_tables(inputfile)
         temp_ddict = {} # collections.defaultdict(list)
         for key, val in datadict.items():

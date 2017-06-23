@@ -1,2 +1,0 @@
-mouse 20.graph 7384
-mouse 19.graph 6188
