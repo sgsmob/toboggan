@@ -4,7 +4,7 @@ Toboggan is a research tool for decomposing a flow on a directed acyclic graph i
 
 ## Command line usage
 ```
-$>python3 toboggan.py [INPUT FILE] 
+$>python3 toboggan.py [INPUT FILE]
 ```
 Runs the Toboggan algorithm on every instance provided in the input file (for file format specifications,
 see below or consider the example file provided in `testdata`).
@@ -22,6 +22,10 @@ Optional arguments:
   * `--indices` INDICES -  Either a file containing indices (position in `.graph`
                      file) on which to run, or a list of indices separated by
                      commas. Ranges are accepted as well, e.g. "1,2-5,6".
+
+### Scripts for high-throughput usage
+The sub-directory `high-throughput-scripts/` contains scripts for running `toboggan.py` on large data sets, as well as scripts for processing the output of `toboggan.py` on these large data sets into an easily handled format.
+See [README.md](./high-throughput-scripts/README.md) for further details.
 
 ## Example Usage
 
@@ -135,7 +139,7 @@ Finished instance.
 ```
 
 The outputs tells us that e.g. the first instance has a solution with one path
-of weight 10 and two paths of weight 20. If we run 
+of weight 10 and two paths of weight 20. If we run
 
 ```
 $>python3 toboggan.py testdata/toboggan_test.graph --indices 2
@@ -157,7 +161,7 @@ The term `trivial` here means that the instance consists only of a single path.
 ### Data formatting
 #### Datasets
 
-We use two files formats in Toboggan, `.graph` and `.truth`. 
+We use two files formats in Toboggan, `.graph` and `.truth`.
 
 A `.graph` file contains an arbitrary number of graphs, stored as follows:
 
@@ -179,7 +183,7 @@ weighted paths) to the graphs contained in the later. We assume the following co
 
 ## Contribution (for Developers)
 
-We welcome contributions to Toboggan, in the form of 
+We welcome contributions to Toboggan, in the form of
 [Pull Requests](https://help.github.com/articles/using-pull-requests/),
 where you "fork" our repository and then request that we "pull" your changes into the main branch.
 You must have a Github account to make a contribution.
@@ -195,11 +199,8 @@ Whenever possible, please follow these guidelines for contributions:
 
 ## Citation and License
 
-<!---
-**Important**: Toboggan is *research software*, so you should cite us when you use it in scientific publications! Please see the CITATION file for citation information.
-[![DOI](https://zenodo.org/...)](https://zenodo.org/badge/...)
-
---> 
+<!-- **Important**: CONCUSS is *research software*, so you should cite us when you use it in scientific publications! Please see the CITATION file for citation information.
+[![DOI](https://zenodo.org/badge/18042/TheoryInPractice/CONCUSS.svg)](https://zenodo.org/badge/latestdoi/18042/TheoryInPractice/CONCUSS) -->
 
 Toboggan is released under the BSD license; see the LICENSE file.
 Distribution, modification and redistribution, and incorporation into other
@@ -211,8 +212,4 @@ software is allowed.
 Development of the Toboggan software package was funded in part by
 the [Gordon & Betty Moore Foundation Data-Driven Discovery Initiative](https://www.moore.org/programs/science/data-driven-discovery),
 through a [DDD Investigator Award](https://www.moore.org/programs/science/data-driven-discovery/investigators)
-to Blair D. Sullivan ([grant GBMF4560](https://www.moore.org/grants/list/GBMF4560)). 
-
-
-
-
+to Blair D. Sullivan ([grant GBMF4560](https://www.moore.org/grants/list/GBMF4560)).
