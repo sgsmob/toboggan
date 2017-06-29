@@ -5,7 +5,6 @@ outputs the relevant info into a single txt file
 
 import argparse
 import os
-import shutil
 import subprocess
 
 
@@ -25,7 +24,7 @@ def iterate_over_directory(input_dir, fname, results_file):
 
 
 def main(args):
-    iterate_over_directory(args.input_dir, args.fname, args.results_file_name)   
+    iterate_over_directory(args.input_dir, args.fname, args.results_file_name)
 
 
 if __name__ == "__main__":

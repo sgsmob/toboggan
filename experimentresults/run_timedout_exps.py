@@ -1,5 +1,3 @@
-import os
-import shutil
 import argparse
 import subprocess
 
@@ -20,8 +18,11 @@ def iterate_over_input_list(input_list,
                 instancenum = int(instancenum) + 1
 
                 subprocess.call("python3 ../toboggan.py {}/{} --indices {} "
-                    "--skip_truth --experiment_info --timeout {} >> {}"
-                    "".format(input_dir, filename, instancenum, timeout, results_file), shell=True)
+                                "--skip_truth --experiment_info --timeout {} "
+                                ">> {}".format(input_dir, filename,
+                                               instancenum, timeout,
+                                               results_file),
+                                shell=True)
 
 
 def main(args):
