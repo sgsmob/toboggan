@@ -78,64 +78,14 @@ def solve(instance, silent=True, max_weight_lower=1,
         weights = list(sorted(w for _, w in largest_cut))
         return solve_dp(instance, silent=True, guessed_weights=weights)
 
-    max_weight = instance.max_weight_bounds[1]
-    feasible_weights = list(filter(lambda w: w <= max_weight,
-                                   instance.weights))
+    weights = [None] * k
 
-    if not silent:
-        print(instance.weights, feasible_weights)
-
-    # figure out whether we get the first or last positions for free
-    largest_free = False
-    smallest_free = False
-    # check largest weight first
-    if instance.max_weight_bounds[0] == instance.max_weight_bounds[1]:
-        largest_free = True
-        largest = instance.max_weight_bounds[0]
-    if min(instance.weights) == 1:
-        smallest_free = True
-        smallest = 1
-
-    positions = list(range(int(smallest_free), k-int(largest_free)))
-
-    # iterate over the number of unguessed weights
-    for diff in range(k+1):
+    sol = solve_dp(instance, silent=True, guessed_weights=weights)
+    if len(sol) > 0:
         if not silent:
-            print("Diff =", diff)
-        # iterate over positions of guessed weights.  We want them to be
-        # ordered, but choose the smallest first to be removed
-        for rev_indices in itertools.combinations(reversed(positions), k-diff):
-            indices = list(reversed(rev_indices))
-            p = len(indices)
-            # when k-1 values are determined, it also determines the kth value
-            if p == k-1:
-                continue
-            # iterate over choices for those guessed weights
-            for chosen_weights in itertools.combinations(feasible_weights, p):
-                weights = [None] * k
-
-                # assign the chosen weights to the guessed positions
-                for p, w in zip(indices, chosen_weights):
-                    weights[p] = w
-
-                # add in free values
-                if smallest_free:
-                    weights[0] = smallest
-                if largest_free:
-                    weights[k-1] = largest
-
-                # quit if this didn't work
-                if not is_feasible(weights, flow, max_weight):
-                    continue
-
-                if not silent:
-                    print("Trying weights", weights)
-                sol = solve_dp(instance, silent=True, guessed_weights=weights)
-                if len(sol) > 0:
-                    if not silent:
-                        try:
-                            for s in sol:
-                                print(s, sum(s.path_weights), flow)
-                        except AttributeError:
-                            print("Unterdetermined solution")
-                    return sol
+            try:
+                for s in sol:
+                    print(s, sum(s.path_weights), flow)
+            except AttributeError:
+                print("Unterdetermined solution")
+        return sol
