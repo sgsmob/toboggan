@@ -12,11 +12,19 @@ import signal
 import cProfile
 # local imports
 from os import path
+import sys
 from toboggan.guess_weight import solve
 from toboggan.parser import read_instances
 from toboggan.flow import Instance
 from toboggan.dp import recover_paths
 from toboggan.graphs import test_flow_cover
+
+
+# Override error message to show help message instead
+class DefaultHelpParser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_help()
+        sys.exit(2)
 
 
 # Timeout context, see
@@ -101,18 +109,17 @@ if __name__ == "__main__":
     """
         Main script
     """
-    parser = argparse.ArgumentParser(description='Splice flows into paths')
-    parser.add_argument('file', help='a .graph file.'
-                        ' Needs a .truth file in the same folder.')
-    parser.add_argument('-p', '--profile',
-                        help="Profile execution", action='store_true')
-    parser.add_argument('--indices',
-                        help='Either a file containing indices '
+    with open('readme_short.txt', 'r') as desc:
+        description = desc.read()
+    parser = DefaultHelpParser(description=description)
+    parser.add_argument('file', help='A .graph file containing the input graph(s).')
+    parser.add_argument('--indices', help='Either a file containing indices '
                         '(position in .graph file) on which to run, '
                         'or a list of indices separated by commas. '
-                        'Ranges are accepted as well, e.g. "1,2-5,6"',
+                        'Ranges are accepted as well, e.g. "1,2-5,6".',
                         type=index_range)
-    parser.add_argument('--timeout', help='Timeout in seconds', type=int)
+    parser.add_argument('--timeout', help='Timeout in seconds, after which execution'
+                        ' for a single graph will be stopped.', type=int)
     parser.add_argument('--skip_truth', help="Do not check for *.truth."
                         " Instead, start from our computed lower-bound on k.",
                         action='store_true')
@@ -120,15 +127,12 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument('--print_contracted', help="Print contracted graph.",
                         action='store_true')
-    parser.add_argument('--disprove', help='Run instance with parameter k-1 '
-                        'instead of k (needs a .truth file)',
-                        action='store_true')
     parser.add_argument('--experiment_info', help='Print out experiment-'
                         'relevant info in format convenient for processing.',
                         action='store_true')
     parser.add_argument("--no_recovery", help="Only print the number of paths"
                         " and their weights in an optimal decomposition, but"
-                        " do not recover the paths", action='store_true')
+                        " do not recover the paths.", action='store_true')
 
     args = parser.parse_args()
 
@@ -164,7 +168,7 @@ if __name__ == "__main__":
         if lastprinted != a[-1]:
             res += "-" + str(a[-1])
 
-        print("# Running on instances", res)
+        print("# Running on instance(s)", res)
     else:
         print("# Running on all instances")
 
@@ -217,10 +221,6 @@ if __name__ == "__main__":
             else:
                 weights = [0]
         else:
-            if args.disprove and k:
-                k = k - 1
-                print("# Using parameter k-1")
-
             # create an instance of the graph
             if args.skip_truth:
                 k = 1
@@ -231,14 +231,7 @@ if __name__ == "__main__":
 
             k_cutset = instance.max_edge_cut_size
 
-            # find the optimal solution size
-            if args.profile:
-                prof = cProfile.Profile()
-                prof.enable()
             solution_weights, time_weights = find_opt_size(instance, maxtime)
-            if args.profile:
-                prof.disable()
-                prof.print_stats('tottime')
 
             time_paths = 0
             # recover the paths in an optimal solution

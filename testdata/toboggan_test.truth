@@ -30,3 +30,9 @@
 4 0 1 2
 5 0 1 2
 6 0 1 2
+# graph number = 7 name = contraction_problem
+1 0 1 2 3 4 7 8 9
+2 0 1 2 5 6 7 8 9
+# graph number = 8 name = contraction_problem_2
+10 0 1 2 3 4 5 6 7
+20 0 1 2 3 4 6 7 

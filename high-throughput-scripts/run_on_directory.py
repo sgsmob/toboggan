@@ -1,5 +1,4 @@
 import os
-import shutil
 import argparse
 import subprocess
 
@@ -16,7 +15,10 @@ def iterate_over_directory(input_dir,
             continue
         # open the graph file
         print("Processing file {}".format(f))
-        subprocess.call("python3 ../toboggan.py {}/{} --skip_truth --experiment_info --timeout {} >> {}.txt".format(input_dir, f, timeout, results_file), shell=True)
+        subprocess.call("python3 toboggan.py {}/{} --skip_truth "
+                        "--experiment_info --timeout {} >>"
+                        " {}".format(input_dir, f, timeout, results_file),
+                        shell=True)
 
 
 def main(args):
@@ -29,9 +31,9 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir", help="directory containing .graph and"
-                        ".truth files", type=str)
+                        " .truth files", type=str)
     parser.add_argument("results_file_name", help="name of file to store notes"
-                        "of instances that are nonoptimal", type=str)
+                        " of instances on which toboggan times out", type=str)
     parser.add_argument("timeout", help="time to run before skipping instance",
                         type=int)
 

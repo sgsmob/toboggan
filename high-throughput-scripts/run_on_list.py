@@ -1,5 +1,3 @@
-import os
-import shutil
 import argparse
 import subprocess
 
@@ -10,20 +8,21 @@ def iterate_over_input_list(input_list,
                             timeout):
     with open(input_list, 'r') as instancelist:
         for line in instancelist:
-            print(line)
+            print(line.strip())
             if line[0] == "#":  # skip that line
                 continue
             parts = line.strip().split()
             if(len(parts) > 0):
                 filename = parts[0]
                 instancenum = parts[1]
-                print(filename)
-                print(instancenum)
                 instancenum = int(instancenum) + 1
 
-                subprocess.call("python3 ../toboggan.py {}/{} --indices {} "
-                    "--skip_truth --experiment_info --timeout {} >> {}.txt"
-                    "".format(input_dir, filename, instancenum, timeout, results_file), shell=True)
+                subprocess.call("python3 toboggan.py {}/{} --indices {} "
+                                "--skip_truth --experiment_info --timeout {} "
+                                ">> {}".format(input_dir, filename,
+                                               instancenum, timeout,
+                                               results_file),
+                                shell=True)
 
 
 def main(args):
@@ -38,11 +37,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("input_dir", help="directory containing .graph and"
-                        ".truth files", type=str)
+                        " .truth files", type=str)
     parser.add_argument("input_list", help="file containing list of names "
                         "of files and instances to run toboggan on.", type=str)
     parser.add_argument("results_file_name", help="name of file to store notes"
-                        "of instances that are nonoptimal", type=str)
+                        " of instances on which toboggan times out", type=str)
     parser.add_argument("timeout", help="time to run before skipping instance",
                         type=int)
 

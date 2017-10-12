@@ -1,0 +1,58 @@
+*********
+Citations
+*********
+
+Software Citation
+=================
+
+If you use the Toboggan software, you must cite:
+
+K. Kloster, P. Kuinke, M.P. O'Brien, F. Reidl, F. Sanchez Villaamil,
+B.D. Sullivan, and A. van der Poel. (2017)
+Toboggan: Version 1.0. Zenodo. 10.5281/zenodo.821634
+
+..code-block::tex
+
+                  @misc{Toboggan_v1.0,
+                    author       = {Kyle Kloster and
+                                    Philipp Kuinke and
+                                    Michael P. O'Brien and
+                                    Felix Reidl and
+                                    Fernando Sanchez Villaamil and
+                                    Blair D. Sullivan and
+                                    Andrew van der Poel},
+                    title        = {Toboggan: Version 1.0},
+                    month        = jun,
+                    year         = 2017,
+                    doi          = {10.5281/zenodo.821634},
+                    url          = {http://dx.doi.org/10.5281/zenodo.821634}
+                  }
+
+If you use any of our published algorithms or heuristics you should *also*
+cite the relevant paper(s) as directed below.
+
+===========================================================
+
+The methods in lib:toboggan (which are used in the main pipeline :program:`toboggan.py`) implement the fpt flow decomposition algorithm described in:
+
+    K. Kloster, P. Kuinke, M.P. O'Brien, F. Reidl, F. Sanchez Villaamil, B.D. Sullivan, and A. van der Poel. (2017)
+   A practical fpt algorithm for Flow Decomposition and transcript assembly.
+   ArXiv:1706.07851. 2017.
+
+
+.. code-block:: tex
+
+@article{toboggan2017,
+  author    = {
+               Kyle Kloster and
+               Philipp Kuinke and
+               Michael P. O'Brien and
+               Felix Reidl and
+               Fernando Sanchez Villaamil and
+               Blair D. Sullivan and
+               Andrew van der Poel},
+  title     = {A practical fpt algorithm for Flow Decomposition and transcript assembly},
+  volume    = {abs/1706.07851},
+  year      = {2017},
+  url       = {https://arxiv.org/abs/1706.07851},
+}
