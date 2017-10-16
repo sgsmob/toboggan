@@ -1,10 +1,3 @@
-sparse_quant_ERR342886 5516
-sparse_quant_ERR205007 5430
-sparse_quant_SRR094903 6823
-sparse_quant_ERR304487 5827
-sparse_quant_SRR1012932 195
-sparse_quant_SRR094182 9193
-sparse_quant_ERR637536 13412
-sparse_quant_ERR579136 1335
-sparse_quant_SRR1003782 5382
-sparse_quant_DRR023490 8366
+sparse_quant_ERR637536 10551
+sparse_quant_SRR065533 13634
+sparse_quant_SRR1026921 12386
