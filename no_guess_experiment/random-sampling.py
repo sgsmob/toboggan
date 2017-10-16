@@ -11,8 +11,8 @@ timeout = 1000
 for idx in [0,1,2,3]:
     froot = froots[idx]
     print("Working on {}".format(froot))
-    input_dir = '/home/kyle/data/rnaseq/' + datadirs[idx] + '/'
-    
+    input_dir = '/home/kakloste/research/instances/rnaseq/' + datadirs[idx] + '/'
+   
     results_file = 'no-guesses-output-' + froot + '.txt'
     
     # load samples
@@ -30,7 +30,7 @@ for idx in [0,1,2,3]:
             
             subprocess.call("python3 toboggan.py {}/{} --skip_truth "
                 "--experiment_info --timeout {} --indices {} >>"
-                " {}".format(input_dir, graphfilename, timeout, graphindex, results_file),
+                " {}".format(input_dir, graphfilename, timeout, graphindex+1, results_file),
                 shell=True)
 
     print("\t done")
